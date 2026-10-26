@@ -1,3 +1,5 @@
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import './globals.css';
@@ -13,7 +15,9 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <ThemeProvider>
-            {children}
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
           </ThemeProvider>
         </AuthProvider>
       </body>
