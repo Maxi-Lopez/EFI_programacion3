@@ -1,31 +1,55 @@
+import Link from 'next/link';
 import { apiFetch } from '@/utils/apiClient';
 import { notFound } from 'next/navigation';
+import Card from '@/components/ui/Card';
+import Boton from '@/components/ui/Boton';
 
 export default async function CatalogoDetallePage({ params }) {
   let producto;
   try {
-    producto = await apiFetch(`/catalogo/categoria-get/${params.id}/`);
+    producto = await apiFetch(`/catalogo/producto/${params.id}/`);
   } catch (error) {
-    throw new Error('No se pudo cargar el producto');
+    notFound();
   }
 
   if (!producto) notFound();
 
   return (
-    <main className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-slate-800">
-        {producto.nombre || 'Producto'}
-      </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <p className="text-slate-600">{producto.descripcion || '-'}</p>
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800">
-            ${producto.precio_lista || 0}
-          </p>
-        </div>
+    <div className="container mx-auto p-4">
+      <div className="flex items-center gap-2 mb-6">
+        <Link href="/catalogo" className="text-slate-600 hover:underline">
+          ← Volver al catálogo
+        </Link>
       </div>
-    </main>
+      <Card className="max-w-lg">
+        <h1 className="text-3xl font-bold mb-2 text-slate-800">
+          {producto.nombre || 'Producto'}
+        </h1>
+        <p className="text-slate-600 mb-4">
+          {producto.descripcion || '-'}
+        </p>
+        <p className="font-semibold text-slate-800 text-lg mb-6">
+          ${producto.precio_lista || 0}
+        </p>
+        <div className="flex gap-2">
+          <Link
+            href={`/dashboard/editar/${producto.id}`}
+            className="flex-1 px-4 py-2 bg-slate-800 text-white rounded text-center hover:bg-slate-700"
+          >
+            Editar
+          </Link>
+          <Boton
+            onClick={() => {
+              if (window.confirm('¿Borrar este producto?')) {
+                // Navegar y el borrado se maneja desde el catálogo
+              }
+            }}
+            className="flex-1 px-4 py-2 bg-red-600 text-white rounded text-center hover:bg-red-700"
+          >
+            Borrar
+          </Boton>
+        </div>
+      </Card>
+    </div>
   );
 }
