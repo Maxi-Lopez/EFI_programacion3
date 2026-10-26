@@ -1,25 +1,48 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useRouter } from 'next/navigation';
+
+const loginSchema = z.object({
+  username: z.string().min(1, 'El usuario es obligatorio'),
+  password: z.string().min(1, 'La contraseña es obligatoria'),
+});
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const [error, setError] = useState(null);
+  const router = useRouter();
+  const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const formData = new FormData(e.currentTarget);
-    const username = formData.get('username');
-    const password = formData.get('password');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setApiError(null);
     try {
-      await login(username, password);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/token/`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
+      if (!res.ok) throw new Error('Credenciales inválidas');
+      const dataRes = await res.json();
+      localStorage.setItem('access_token', dataRes.access);
+      localStorage.setItem('refresh_token', dataRes.refresh);
+      router.push('/catalogo');
     } catch (err) {
-      setError(err.message || 'Credenciales inválidas');
+      setApiError(err.message || 'Credenciales inválidas');
     } finally {
       setLoading(false);
     }
@@ -28,13 +51,13 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-md p-8 bg-white rounded-xl shadow-sm"
       >
         <h1 className="text-2xl font-bold mb-6 text-slate-800">Iniciar sesión</h1>
-        {error && (
+        {apiError && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
-            {error}
+            {apiError}
           </div>
         )}
         <div className="space-y-4">
@@ -43,22 +66,34 @@ export default function LoginPage() {
               Usuario
             </label>
             <input
-              name="username"
+              {...register('username')}
               type="text"
-              required
-              className="w-full border border-slate-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-800"
+              className={`w-full border border-slate-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-800 ${
+                errors.username ? 'border-red-500' : ''
+              }`}
             />
+            {errors.username && (
+              <span className="text-xs text-red-500 mt-1 block">
+                {errors.username.message}
+              </span>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Contraseña
             </label>
             <input
-              name="password"
+              {...register('password')}
               type="password"
-              required
-              className="w-full border border-slate-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-800"
+              className={`w-full border border-slate-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-800 ${
+                errors.password ? 'border-red-500' : ''
+              }`}
             />
+            {errors.password && (
+              <span className="text-xs text-red-500 mt-1 block">
+                {errors.password.message}
+              </span>
+            )}
           </div>
         </div>
         <button
