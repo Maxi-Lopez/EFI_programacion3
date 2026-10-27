@@ -9,7 +9,7 @@ import Boton from '@/components/ui/Boton';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 
-const loginSchema = z.object({
+export const loginSchema = z.object({
   username: z.string().min(1, 'El usuario es obligatorio'),
   password: z.string().min(1, 'La contraseña es obligatoria'),
 });
