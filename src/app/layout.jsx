@@ -2,6 +2,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { Suspense } from 'react';
 import './globals.css';
 
 export const metadata = {
@@ -15,7 +16,9 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <ThemeProvider>
-            <Navbar />
+            <Suspense fallback={<nav className="border-b border-slate-200 bg-white sticky top-0 z-50" />}>
+              <Navbar />
+            </Suspense>
             <main>{children}</main>
             <Footer />
           </ThemeProvider>

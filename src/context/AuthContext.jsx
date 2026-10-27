@@ -6,17 +6,12 @@ import { useRouter } from 'next/navigation';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    return token ? { token } : null;
+  });
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      setUser({ token });
-    }
-    setLoading(false);
-  }, []);
 
   const login = async (username, password) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/token/`, {
