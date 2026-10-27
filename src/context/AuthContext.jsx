@@ -28,6 +28,8 @@ export function AuthProvider({ children }) {
     const data = await res.json();
     localStorage.setItem('access_token', data.access);
     localStorage.setItem('refresh_token', data.refresh);
+    document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+    document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
     setUser({ username });
     router.push('/catalogo');
   };
@@ -35,6 +37,8 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    document.cookie = 'access_token=; path=/; max-age=0';
+    document.cookie = 'refresh_token=; path=/; max-age=0';
     setUser(null);
     router.push('/login');
   };
