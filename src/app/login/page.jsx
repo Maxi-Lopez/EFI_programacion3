@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import Boton from '@/components/ui/Boton';
+import Input from '@/components/ui/Input';
+import Card from '@/components/ui/Card';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'El usuario es obligatorio'),
@@ -12,7 +15,7 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,25 +25,14 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
+    defaultValues: { username: '', password: '' },
   });
 
   const onSubmit = async (data) => {
     setLoading(true);
     setApiError(null);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/token/`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        }
-      );
-      if (!res.ok) throw new Error('Credenciales inválidas');
-      const dataRes = await res.json();
-      localStorage.setItem('access_token', dataRes.access);
-      localStorage.setItem('refresh_token', dataRes.refresh);
-      router.push('/catalogo');
+      await login(data.username, data.password);
     } catch (err) {
       setApiError(err.message || 'Credenciales inválidas');
     } finally {
@@ -50,27 +42,26 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md p-8 bg-white rounded-xl shadow-sm"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-slate-800">Iniciar sesión</h1>
+      <Card className="w-full max-w-md p-8 shadow-sm">
+        <h1 className="text-2xl font-bold mb-6 text-slate-800 text-center">
+          Iniciar sesión
+        </h1>
         {apiError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-center">
             {apiError}
           </div>
         )}
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Usuario
             </label>
-            <input
-              {...register('username')}
+            <Input
+              id="username"
+              name="username"
               type="text"
-              className={`w-full border border-slate-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-800 ${
-                errors.username ? 'border-red-500' : ''
-              }`}
+              {...register('username')}
+              error={errors.username?.message}
             />
             {errors.username && (
               <span className="text-xs text-red-500 mt-1 block">
@@ -82,12 +73,12 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Contraseña
             </label>
-            <input
-              {...register('password')}
+            <Input
+              id="password"
+              name="password"
               type="password"
-              className={`w-full border border-slate-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-800 ${
-                errors.password ? 'border-red-500' : ''
-              }`}
+              {...register('password')}
+              error={errors.password?.message}
             />
             {errors.password && (
               <span className="text-xs text-red-500 mt-1 block">
@@ -95,15 +86,15 @@ export default function LoginPage() {
               </span>
             )}
           </div>
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2 bg-slate-800 text-white rounded hover:bg-slate-700 disabled:opacity-50"
-        >
-          {loading ? 'Entrando...' : 'Entrar'}
-        </button>
-      </form>
+          <Boton
+            type="submit"
+            disabled={loading || isSubmitting}
+            className="w-full py-2 bg-slate-800 text-white rounded hover:bg-slate-700 disabled:opacity-50"
+          >
+            {loading ? 'Entrando...' : 'Entrar'}
+          </Boton>
+        </form>
+      </Card>
     </div>
   );
 }
