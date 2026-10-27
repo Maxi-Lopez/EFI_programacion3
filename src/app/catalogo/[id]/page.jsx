@@ -1,18 +1,44 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiFetch } from '@/utils/apiClient';
+import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
+import { apiFetch } from '@/utils/apiClient';
 import Card from '@/components/ui/Card';
 import Boton from '@/components/ui/Boton';
+import Cargando from '@/components/Cargando';
 
-export default async function CatalogoDetallePage({ params }) {
-  let producto;
-  try {
-    producto = await apiFetch(`/catalogo/producto/${params.id}/`);
-  } catch (error) {
-    notFound();
-  }
+export default function CatalogoDetallePage({ params }) {
+  const router = useRouter();
+  const [producto, setProducto] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!producto) notFound();
+  useEffect(() => {
+    let montado = true;
+    const cargar = async () => {
+      try {
+        setLoading(true);
+        const data = await apiFetch(`/catalogo/producto/${params.id}/`);
+        if (montado) {
+          setProducto(data);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (montado) {
+          setError(err.message || 'Producto no encontrado');
+          setLoading(false);
+          notFound();
+        }
+      }
+    };
+    cargar();
+    return () => { montado = false; };
+  }, [params.id]);
+
+  if (loading) return <Cargando mensaje="Cargando producto…" />;
+  if (error || !producto) return notFound();
 
   return (
     <div className="container mx-auto p-4">
@@ -38,16 +64,26 @@ export default async function CatalogoDetallePage({ params }) {
           >
             Editar
           </Link>
-          <Boton
-            onClick={() => {
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
               if (window.confirm('¿Borrar este producto?')) {
-                // Navegar y el borrado se maneja desde el catálogo
+                apiFetch(`/catalogo/producto/${producto.id}/`, {
+                  method: 'DELETE',
+                }).then(() => {
+                  router.push('/catalogo');
+                });
               }
             }}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded text-center hover:bg-red-700"
+            className="flex-1"
           >
-            Borrar
-          </Boton>
+            <Boton
+              type="submit"
+              className="flex-1 px-4 py-2 bg-red-600 text-white rounded text-center hover:bg-red-700"
+            >
+              Borrar
+            </Boton>
+          </form>
         </div>
       </Card>
     </div>
