@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,36 +12,77 @@ import Card from '@/components/ui/Card';
 
 export const productoSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
-  descripcion: z.string().max(500, 'Máximo 500 caracteres').optional(),
-  precio_lista: z
-    .string()
-    .min(1, 'El precio es obligatorio')
-    .regex(/^\d+(\.\d{1,2})?$/, 'Precio inválido'),
-  stock: z
-    .string()
-    .min(1, 'El stock es obligatorio')
-    .regex(/^\d+$/, 'Stock debe ser un número entero'),
+  sku: z.string().min(1, 'El SKU es obligatorio').max(100, 'Máximo 100 caracteres'),
+  descripcion_corta: z.string().max(500, 'Máximo 500 caracteres').optional(),
+  precio_lista: z.string().min(1, 'El precio es obligatorio').regex(/^\d+(\.\d{1,2})?$/, 'Precio inválido'),
+  stock_total: z.string().min(1, 'El stock es obligatorio').regex(/^\d+$/, 'Stock debe ser un número entero'),
+  marca: z.string().min(1, 'Selecciona una marca'),
+  categoria: z.string().min(1, 'Selecciona una categoría'),
 });
 
 export default function ProductoForm({ modo = 'crear', id }) {
   const router = useRouter();
   const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [marcas, setMarcas] = useState([]);
+  const [categorias, setCategorias] = useState([]);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
   } = useForm({
     resolver: zodResolver(productoSchema),
     defaultValues: {
       nombre: '',
-      descripcion: '',
+      sku: '',
+      descripcion_corta: '',
       precio_lista: '',
-      stock: '',
+      stock_total: '',
+      marca: '',
+      categoria: '',
     },
   });
+
+  useEffect(() => {
+    const cargarRefs = async () => {
+      try {
+        const [mRes, cRes] = await Promise.all([
+          apiFetch('/catalogo/marca/'),
+          apiFetch('/catalogo/categoria/'),
+        ]);
+        const mData = Array.isArray(mRes) ? mRes : mRes.results || [];
+        const cData = Array.isArray(cRes) ? cRes : cRes.results || [];
+        setMarcas(mData);
+        setCategorias(cData);
+      } catch (err) {
+        setApiError(err.message || 'No se pudieron cargar marcas y categorías');
+      }
+    };
+    cargarRefs();
+  }, []);
+
+  useEffect(() => {
+    if (modo === 'editar' && id) {
+      const cargarProducto = async () => {
+        try {
+          const producto = await apiFetch(`/catalogo/producto/${id}/`);
+          setValue('nombre', producto.nombre || '');
+          setValue('sku', producto.sku || '');
+          setValue('descripcion_corta', producto.descripcion_corta || '');
+          setValue('precio_lista', String(producto.precio_lista || ''));
+          setValue('stock_total', String(producto.stock_total || ''));
+          setValue('marca', String(producto.marca || ''));
+          setValue('categoria', String(producto.categoria || ''));
+        } catch (err) {
+          setApiError(err.message || 'No se pudo cargar el producto');
+        }
+      };
+      cargarProducto();
+    }
+  }, [modo, id, setValue]);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -49,9 +90,12 @@ export default function ProductoForm({ modo = 'crear', id }) {
     try {
       const body = {
         nombre: data.nombre,
-        descripcion: data.descripcion || '',
+        sku: data.sku,
+        descripcion_corta: data.descripcion_corta || '',
         precio_lista: parseFloat(data.precio_lista),
-        stock: parseInt(data.stock, 10),
+        stock_total: parseInt(data.stock_total, 10),
+        marca: parseInt(data.marca, 10),
+        categoria: parseInt(data.categoria, 10),
       };
 
       if (modo === 'editar' && id) {
@@ -92,15 +136,49 @@ export default function ProductoForm({ modo = 'crear', id }) {
             {...register('nombre')}
             error={errors.nombre}
           />
-          {errors.nombre && (
-            <span className="text-xs text-red-500">{errors.nombre.message}</span>
-          )}
+          {errors.nombre && <span className="text-xs text-red-500">{errors.nombre.message}</span>}
           <Input
-            id="descripcion"
-            label="Descripción"
-            {...register('descripcion')}
-            error={errors.descripcion}
+            id="sku"
+            label="SKU"
+            {...register('sku')}
+            error={errors.sku}
           />
+          {errors.sku && <span className="text-xs text-red-500">{errors.sku.message}</span>}
+          <Input
+            id="descripcion_corta"
+            label="Descripción corta"
+            {...register('descripcion_corta')}
+            error={errors.descripcion_corta}
+          />
+          {errors.descripcion_corta && <span className="text-xs text-red-500">{errors.descripcion_corta.message}</span>}
+          <select
+            id="marca"
+            label="Marca"
+            {...register('marca')}
+            className="block w-full px-3 py-2 border border-slate-300 rounded-md text-slate-700 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none"
+          >
+            <option value="">Selecciona una marca</option>
+            {marcas.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nombre}
+              </option>
+            ))}
+          </select>
+          {errors.marca && <span className="text-xs text-red-500">{errors.marca.message}</span>}
+          <select
+            id="categoria"
+            label="Categoría"
+            {...register('categoria')}
+            className="block w-full px-3 py-2 border border-slate-300 rounded-md text-slate-700 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none"
+          >
+            <option value="">Selecciona una categoría</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
+          </select>
+          {errors.categoria && <span className="text-xs text-red-500">{errors.categoria.message}</span>}
           <Input
             id="precio_lista"
             label="Precio lista"
@@ -109,17 +187,15 @@ export default function ProductoForm({ modo = 'crear', id }) {
             {...register('precio_lista')}
             error={errors.precio_lista}
           />
-          {errors.precio_lista && (
-            <span className="text-xs text-red-500">{errors.precio_lista.message}</span>
-          )}
+          {errors.precio_lista && <span className="text-xs text-red-500">{errors.precio_lista.message}</span>}
           <Input
-            id="stock"
-            label="Stock"
+            id="stock_total"
+            label="Stock total"
             type="number"
-            {...register('stock')}
-            error={errors.stock}
+            {...register('stock_total')}
+            error={errors.stock_total}
           />
-          {errors.stock && <span className="text-xs text-red-500">{errors.stock.message}</span>}
+          {errors.stock_total && <span className="text-xs text-red-500">{errors.stock_total.message}</span>}
           <div className="flex gap-2">
             <Boton type="submit" disabled={isSubmitting} className="w-full">
               {loading ? 'Guardando…' : 'Guardar'}

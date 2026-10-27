@@ -6,9 +6,12 @@ describe('productoSchema (Zod)', () => {
   it('valida un producto completo correctamente', () => {
     const resultado = productoSchema.safeParse({
       nombre: 'Lápiz',
-      descripcion: 'Lápiz grafito',
+      sku: 'LAP-001',
+      descripcion_corta: 'Lápiz grafito',
       precio_lista: '1200.50',
-      stock: '10',
+      stock_total: '10',
+      marca: '13',
+      categoria: '13',
     });
     expect(resultado.success).toBe(true);
   });
@@ -16,9 +19,12 @@ describe('productoSchema (Zod)', () => {
   it('rechaza nombre vacío', () => {
     const resultado = productoSchema.safeParse({
       nombre: '',
-      descripcion: '',
+      sku: 'LAP-001',
+      descripcion_corta: '',
       precio_lista: '100',
-      stock: '5',
+      stock_total: '5',
+      marca: '13',
+      categoria: '13',
     });
     expect(resultado.success).toBe(false);
     expect(resultado.error).toBeDefined();
@@ -27,9 +33,12 @@ describe('productoSchema (Zod)', () => {
   it('rechaza precio inválido', () => {
     const resultado = productoSchema.safeParse({
       nombre: 'Lápiz',
-      descripcion: '',
+      sku: 'LAP-001',
+      descripcion_corta: '',
       precio_lista: 'abc',
-      stock: '5',
+      stock_total: '5',
+      marca: '13',
+      categoria: '13',
     });
     expect(resultado.success).toBe(false);
   });
@@ -37,9 +46,12 @@ describe('productoSchema (Zod)', () => {
   it('rechaza stock no numérico', () => {
     const resultado = productoSchema.safeParse({
       nombre: 'Lápiz',
-      descripcion: '',
+      sku: 'LAP-001',
+      descripcion_corta: '',
       precio_lista: '100',
-      stock: 'cinco',
+      stock_total: 'cinco',
+      marca: '13',
+      categoria: '13',
     });
     expect(resultado.success).toBe(false);
   });
