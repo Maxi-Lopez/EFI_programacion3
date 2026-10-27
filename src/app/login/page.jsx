@@ -63,6 +63,11 @@ export default function LoginPage() {
               {...register('username')}
               error={errors.username?.message}
             />
+            {errors.username && (
+              <span className="text-xs text-red-500 mt-1 block">
+                {errors.username.message}
+              </span>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -75,6 +80,11 @@ export default function LoginPage() {
               {...register('password')}
               error={errors.password?.message}
             />
+            {errors.password && (
+              <span className="text-xs text-red-500 mt-1 block">
+                {errors.password.message}
+              </span>
+            )}
           </div>
           <Boton
             type="submit"
