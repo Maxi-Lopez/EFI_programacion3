@@ -10,7 +10,7 @@ import Boton from '@/components/ui/Boton';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 
-const productoSchema = z.object({
+export const productoSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
   descripcion: z.string().max(500, 'Máximo 500 caracteres').optional(),
   precio_lista: z
