@@ -1,26 +1,28 @@
 import Navbar from '@/components/layout/Navbar';
+import MenuLineal from '@/components/layout/MenuLineal';
 import Footer from '@/components/layout/Footer';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { Suspense } from 'react';
+import BackToTop from '@/components/ui/BackToTop';
 import './globals.css';
 
 export const metadata = {
-  title: 'Mi Proyecto - Catálogo',
+  title: 'Nexusgamer - Tienda de Computación',
   description: 'Frontend consumiendo API Django REST',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
-      <body>
+      <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <ThemeProvider>
-            <Suspense fallback={<nav className="border-b border-slate-200 bg-white sticky top-0 z-50" />}>
-              <Navbar />
-            </Suspense>
-            <main>{children}</main>
+            <Navbar />
+            <MenuLineal />
+            <main className="flex-grow">{children}</main>
             <Footer />
+            <BackToTop />
           </ThemeProvider>
         </AuthProvider>
       </body>
