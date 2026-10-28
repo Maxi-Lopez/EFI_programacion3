@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/utils/apiClient';
+import { useAuth } from '@/context/AuthContext';
 import ProductoCard from '@/components/ProductoCard';
 import Cargando from '@/components/Cargando';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const search = searchParams.get('search') || '';
@@ -58,14 +60,16 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <div className="flex justify-end mb-4">
-        <Link
-          href="/catalogo/nuevo"
-          className="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 text-sm"
-        >
-          + Nuevo producto
-        </Link>
-      </div>
+      {user && (user.rol === 'admin' || user.rol === 'administrador' || user.rol === 'vendedor') && (
+        <div className="flex justify-end mb-4">
+          <Link
+            href="/catalogo/nuevo"
+            className="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 text-sm"
+          >
+            + Nuevo producto
+          </Link>
+        </div>
+      )}
 
       {productos.length === 0 && (
         <div className="text-center py-20 text-slate-500">

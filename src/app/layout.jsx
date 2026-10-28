@@ -18,7 +18,9 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <ThemeProvider>
-            <Navbar />
+            <Suspense fallback={<div className="h-16 w-full border-b border-slate-200 bg-white" />}>
+              <Navbar />
+            </Suspense>
             <MenuLineal />
             <main className="flex-grow">{children}</main>
             <Footer />
