@@ -12,22 +12,23 @@ export default function Footer() {
               width={24}
               height={24}
               className="rounded"
+              unoptimized
             />
             <span className="text-sm font-medium text-slate-600">Nexusgamer</span>
           </div>
 
           <div className="flex items-center gap-6">
             <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} />
+              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
             </a>
             <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} />
+              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
             </a>
             <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} />
+              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
             </a>
             <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} />
+              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
             </a>
           </div>
 

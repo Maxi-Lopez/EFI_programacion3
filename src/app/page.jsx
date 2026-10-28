@@ -27,6 +27,7 @@ export default function SplashPage() {
           width={120}
           height={120}
           className="mb-4"
+          unoptimized
         />
         <h1 className="text-4xl font-bold text-slate-800">Nexusgamer</h1>
         <p className="mt-2 text-slate-500">Tu tienda de computación</p>
