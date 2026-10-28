@@ -4,7 +4,13 @@ export function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('access_token')?.value;
 
-  const rutasProtegidas = ['/catalogo/nuevo'];
+  const rutasProtegidas = [
+    '/catalogo/nuevo',
+    '/ventas',
+    '/compras',
+    '/proveedores',
+    '/categorias',
+  ];
 
   const estaEnRutaProtegida = rutasProtegidas.some(
     (ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`)
@@ -20,5 +26,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/catalogo/nuevo'],
+  matcher: ['/catalogo/nuevo', '/ventas', '/compras', '/proveedores', '/categorias'],
 };

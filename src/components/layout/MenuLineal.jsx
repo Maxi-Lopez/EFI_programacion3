@@ -1,6 +1,10 @@
-import Link from 'next/link';
+'use client';
 
-const items = [
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+
+const itemsPublicos = [
   { label: 'Productos', href: '/catalogo' },
   { label: 'Ofertas', href: '/catalogo?ofertas=1' },
   { label: 'Marcas', href: '/catalogo?marcas=1' },
@@ -11,7 +15,37 @@ const items = [
   { label: 'Sobre nosotros', href: '/sobre-nosotros' },
 ];
 
+const itemsDashboard = [
+  { label: 'Productos', href: '/catalogo' },
+  { label: 'Marcas', href: '/catalogo?marcas=1' },
+  { label: 'Categorías', href: '/categorias' },
+  { label: 'Contacto', href: '/contacto' },
+  { label: 'Sobre nosotros', href: '/sobre-nosotros' },
+];
+
+const itemsAdmin = [
+  { label: 'Ventas', href: '/ventas' },
+  { label: 'Compras', href: '/compras' },
+  { label: 'Proveedores', href: '/proveedores' },
+  { label: 'Categorías (admin)', href: '/categorias' },
+];
+
+const esAdminOMVendedor = (rol) =>
+  ['admin', 'administrador', 'vendedor'].includes(String(rol || '').toLowerCase());
+
 export default function MenuLineal() {
+  const { user } = useAuth();
+  const pathname = usePathname();
+  const enDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
+
+  const itemsPublicosSinOfertas = itemsPublicos.filter((i) => i.label !== 'Ofertas');
+
+  const items = enDashboard
+    ? itemsDashboard
+    : user
+      ? [...itemsPublicosSinOfertas, ...(esAdminOMVendedor(user.rol) ? itemsAdmin : [])]
+      : itemsPublicos;
+
   return (
     <nav className="bg-white border-b border-slate-200 px-6 py-3 overflow-x-auto whitespace-nowrap">
       <div className="flex gap-8">

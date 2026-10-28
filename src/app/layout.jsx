@@ -21,7 +21,9 @@ export default function RootLayout({ children }) {
             <Suspense fallback={<div className="h-16 w-full border-b border-slate-200 bg-white" />}>
               <Navbar />
             </Suspense>
-            <MenuLineal />
+            <Suspense fallback={<div className="h-10 border-b border-slate-200 bg-white" />}>
+              <MenuLineal />
+            </Suspense>
             <main className="flex-grow">{children}</main>
             <Footer />
             <BackToTop />

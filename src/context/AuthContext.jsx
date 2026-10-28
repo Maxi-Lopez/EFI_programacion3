@@ -32,7 +32,8 @@ export function AuthProvider({ children }) {
     if (!token) return null;
     const decoded = decodeToken(token);
     const rol = extraerRol(decoded);
-    return { token, username: extraerUsername(decoded), rol };
+    const username = typeof window !== 'undefined' ? localStorage.getItem('username') : null;
+    return { token, username: username || extraerUsername(decoded), rol };
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -44,16 +45,18 @@ export function AuthProvider({ children }) {
     });
     localStorage.setItem('access_token', data.access);
     localStorage.setItem('refresh_token', data.refresh);
+    localStorage.setItem('username', username);
     document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
     document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
     const decoded = decodeToken(data.access);
-    setUser({ username: extraerUsername(decoded), token: data.access, rol: extraerRol(decoded) });
+    setUser({ username, token: data.access, rol: extraerRol(decoded) });
     router.push('/catalogo');
   };
 
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
     document.cookie = 'access_token=; path=/; max-age=0';
     document.cookie = 'refresh_token=; path=/; max-age=0';
     setUser(null);

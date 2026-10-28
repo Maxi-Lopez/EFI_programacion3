@@ -7,6 +7,8 @@ import { apiFetch } from '@/utils/apiClient';
 import { useAuth } from '@/context/AuthContext';
 import ProductoCard from '@/components/ProductoCard';
 import Cargando from '@/components/Cargando';
+import Card from '@/components/ui/Card';
+import Input from '@/components/ui/Input';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -62,6 +64,17 @@ export default function DashboardPage() {
           <span className="font-medium text-slate-800">{query}</span>
         </div>
       ) : null}
+
+      <Card className="mb-6">
+        <Input
+          id="buscar"
+          label="Buscar producto"
+          placeholder="Buscar por nombre…"
+          value={query}
+          onChange={handleSearchChange}
+          className="w-full max-w-md"
+        />
+      </Card>
 
       {['admin', 'administrador'].includes(user?.rol?.toLowerCase()) && (
         <div className="flex justify-end mb-4">
