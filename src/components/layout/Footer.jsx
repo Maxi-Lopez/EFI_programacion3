@@ -7,12 +7,11 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
             <Image
-              src="/Nexusgamer%20Logo%20Showcase.png"
+              src="/images/logo.png"
               alt="Nexusgamer Logo"
               width={24}
               height={24}
               className="rounded"
-              unoptimized
             />
             <span className="text-sm font-medium text-slate-600">Nexusgamer</span>
           </div>

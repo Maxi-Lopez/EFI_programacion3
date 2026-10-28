@@ -38,12 +38,11 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link href="/">
               <Image
-                src="/Nexusgamer%20Logo%20Showcase.png"
+                src="/images/logo.png"
                 alt="Nexusgamer Logo"
                 width={32}
                 height={32}
                 className="rounded"
-                unoptimized
               />
             </Link>
           </div>

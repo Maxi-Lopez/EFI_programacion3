@@ -22,12 +22,11 @@ export default function SplashPage() {
     return (
       <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
         <Image
-          src="/Nexusgamer%20Logo%20Showcase.png"
+          src="/images/logo.png"
           alt="Nexusgamer Logo"
           width={120}
           height={120}
           className="mb-4"
-          unoptimized
         />
         <h1 className="text-4xl font-bold text-slate-800">Nexusgamer</h1>
         <p className="mt-2 text-slate-500">Tu tienda de computación</p>
