@@ -28,6 +28,11 @@ export default function LoginPage() {
     defaultValues: { username: '', password: '' },
   });
 
+  const handleSubmitLogin = async (e) => {
+    e.preventDefault();
+    await handleSubmit(onSubmit)(e);
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
     setApiError(null);
@@ -51,7 +56,7 @@ export default function LoginPage() {
             {apiError}
           </div>
         )}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmitLogin} method="post" className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Usuario

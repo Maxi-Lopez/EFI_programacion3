@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { apiFetch } from '@/utils/apiClient';
 import ProductoCard from '@/components/ProductoCard';
 import Card from '@/components/ui/Card';
@@ -10,8 +11,10 @@ import Input from '@/components/ui/Input';
 import Cargando from '@/components/Cargando';
 
 export default function CatalogoPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const search = searchParams.get('search') || '';
   const [productos, setProductos] = useState([]);
-  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,7 +23,10 @@ export default function CatalogoPage() {
     const cargar = async () => {
       try {
         setLoading(true);
-        const data = await apiFetch('/catalogo/producto-get/');
+        const endpoint = search
+          ? `/catalogo/producto-get/?search=${encodeURIComponent(search)}`
+          : '/catalogo/producto-get/';
+        const data = await apiFetch(endpoint);
         if (montado) setProductos(Array.isArray(data) ? data : data.results || []);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar los productos');
@@ -30,11 +36,7 @@ export default function CatalogoPage() {
     };
     cargar();
     return () => { montado = false; };
-  }, []);
-
-  const filtrados = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(search.toLowerCase())
-  );
+  }, [search]);
 
   const handleBorrar = async (id) => {
     if (!window.confirm('¿Borrar este producto?')) return;
@@ -44,6 +46,17 @@ export default function CatalogoPage() {
     } catch (err) {
       setError(err.message || 'No se pudo borrar el producto');
     }
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    const params = new URLSearchParams(searchParams);
+    if (query) {
+      params.set('search', query);
+    } else {
+      params.delete('search');
+    }
+    router.push(`/catalogo?${params.toString()}`);
   };
 
   if (loading) return <Cargando mensaje="Cargando productos…" />;
@@ -72,19 +85,19 @@ export default function CatalogoPage() {
           label="Buscar producto"
           placeholder="Buscar por nombre…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
           className="w-full max-w-md"
         />
       </Card>
 
-      {filtrados.length === 0 && (
+      {productos.length === 0 && (
         <div className="text-center py-10 text-slate-500">
           No se encontraron productos{search ? ' con ese nombre' : ''}.
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {filtrados.map((prod) => (
+        {productos.map((prod) => (
           <Card key={prod.id} className="flex flex-col">
             <ProductoCard producto={prod} />
             <div className="mt-auto pt-4 flex gap-2">

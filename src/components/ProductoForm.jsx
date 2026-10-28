@@ -50,8 +50,8 @@ export default function ProductoForm({ modo = 'crear', id }) {
     const cargarRefs = async () => {
       try {
         const [mRes, cRes] = await Promise.all([
-          apiFetch('/catalogo/marca/'),
-          apiFetch('/catalogo/categoria/'),
+          apiFetch('/catalogo/marca-get/'),
+          apiFetch('/catalogo/categoria-get/'),
         ]);
         const mData = Array.isArray(mRes) ? mRes : mRes.results || [];
         const cData = Array.isArray(cRes) ? cRes : cRes.results || [];
