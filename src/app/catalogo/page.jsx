@@ -9,8 +9,10 @@ import Card from '@/components/ui/Card';
 import Boton from '@/components/ui/Boton';
 import Input from '@/components/ui/Input';
 import Cargando from '@/components/Cargando';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CatalogoPage() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const search = searchParams.get('search') || '';
@@ -69,14 +71,16 @@ export default function CatalogoPage() {
           <h1 className="text-3xl font-bold mb-2 text-slate-800">Catálogo</h1>
           <p className="text-slate-600">Gestión de productos</p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href="/catalogo/nuevo"
-            className="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700"
-          >
-            + Nuevo producto
-          </Link>
-        </div>
+        {['admin', 'administrador'].includes(user?.rol?.toLowerCase()) && (
+          <div className="flex gap-2">
+            <Link
+              href="/catalogo/nuevo"
+              className="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700"
+            >
+              + Nuevo producto
+            </Link>
+          </div>
+        )}
       </div>
 
       <Card className="mb-6">
@@ -100,20 +104,22 @@ export default function CatalogoPage() {
         {productos.map((prod) => (
           <Card key={prod.id} className="flex flex-col">
             <ProductoCard producto={prod} />
-            <div className="mt-auto pt-4 flex gap-2">
-              <Link
-                href={`/dashboard/editar/${prod.id}`}
-                className="flex-1 px-3 py-2 bg-slate-100 text-slate-800 text-sm rounded hover:bg-slate-200 text-center"
-              >
-                Editar
-              </Link>
-              <Boton
-                onClick={() => handleBorrar(prod.id)}
-                className="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 text-center"
-              >
-                Borrar
-              </Boton>
-            </div>
+            {['admin', 'administrador'].includes(user?.rol?.toLowerCase()) && (
+              <div className="mt-auto pt-4 flex gap-2">
+                <Link
+                  href={`/dashboard/editar/${prod.id}`}
+                  className="flex-1 px-3 py-2 bg-slate-100 text-slate-800 text-sm rounded hover:bg-slate-200 text-center"
+                >
+                  Editar
+                </Link>
+                <Boton
+                  onClick={() => handleBorrar(prod.id)}
+                  className="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 text-center"
+                >
+                  Borrar
+                </Boton>
+              </div>
+            )}
           </Card>
         ))}
       </div>

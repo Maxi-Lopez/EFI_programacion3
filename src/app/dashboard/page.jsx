@@ -60,7 +60,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      {user && (user.rol === 'admin' || user.rol === 'administrador' || user.rol === 'vendedor') && (
+      {['admin', 'administrador'].includes(user?.rol?.toLowerCase()) && (
         <div className="flex justify-end mb-4">
           <Link
             href="/catalogo/nuevo"
@@ -81,28 +81,30 @@ export default function DashboardPage() {
         {productos.map((prod) => (
           <div key={prod.id} className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow flex flex-col">
             <ProductoCard producto={prod} />
-            <div className="mt-auto pt-4 flex gap-2">
-              <Link
-                href={`/dashboard/editar/${prod.id}`}
-                className="flex-1 px-3 py-2 bg-slate-100 text-slate-800 text-sm rounded hover:bg-slate-200 text-center"
-              >
-                Editar
-              </Link>
-              <button
-                onClick={() => {
-                  if (window.confirm('¿Borrar este producto?')) {
-                    apiFetch(`/catalogo/producto/${prod.id}/`, {
-                      method: 'DELETE',
-                    }).then(() => {
-                      router.push('/dashboard');
-                    });
-                  }
-                }}
-                className="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 text-center"
-              >
-                Borrar
-              </button>
-            </div>
+            {['admin', 'administrador'].includes(user?.rol?.toLowerCase()) && (
+              <div className="mt-auto pt-4 flex gap-2">
+                <Link
+                  href={`/dashboard/editar/${prod.id}`}
+                  className="flex-1 px-3 py-2 bg-slate-100 text-slate-800 text-sm rounded hover:bg-slate-200 text-center"
+                >
+                  Editar
+                </Link>
+                <button
+                  onClick={() => {
+                    if (window.confirm('¿Borrar este producto?')) {
+                      apiFetch(`/catalogo/producto/${prod.id}/`, {
+                        method: 'DELETE',
+                      }).then(() => {
+                        router.push('/dashboard');
+                      });
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 text-center"
+                >
+                  Borrar
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
