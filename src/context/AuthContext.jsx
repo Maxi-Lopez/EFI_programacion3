@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/utils/apiClient';
 
 const AuthContext = createContext();
 
@@ -14,13 +15,10 @@ export function AuthProvider({ children }) {
   const router = useRouter();
 
   const login = async (username, password) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/token/`, {
+    const data = await apiFetch('/token/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) throw new Error('Credenciales inválidas');
-    const data = await res.json();
     localStorage.setItem('access_token', data.access);
     localStorage.setItem('refresh_token', data.refresh);
     document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
