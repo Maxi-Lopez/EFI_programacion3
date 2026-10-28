@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="100" viewBox="0 0 400 100">
+  <rect width="400" height="100" fill="#f1f4f5"/>
+  <text x="20" y="30" font-family="Arial" font-size="18" fill="#0e7c72">Redes Sociales</text>
+  <rect x="20" y="40" width="30" height="30" fill="#0e7c72"/>
+  <text x="35" y="60" font-family="Arial" font-size="14" fill="white" dominant-baseline="middle">IG</text>
+  <rect x="60" y="40" width="30" height="30" fill="#0e7c72"/>
+  <text x="75" y="60" font-family="Arial" font-size="14" fill="white" dominant-baseline="middle">FB</text>
+  <rect x="100" y="40" width="30" height="30" fill="#0e7c72"/>
+  <text x="115" y="60" font-family="Arial" font-size="14" fill="white" dominant-baseline="middle">X</text>
+  <rect x="140" y="40" width="30" height="30" fill="#0e7c72"/>
+  <text x="155" y="60" font-family="Arial" font-size="14" fill="white" dominant-baseline="middle">WA</text>
+</svg>
