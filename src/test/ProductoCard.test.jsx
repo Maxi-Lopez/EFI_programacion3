@@ -1,6 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ProductoCard from '@/components/ProductoCard';
+import { AuthProvider } from '@/context/AuthContext';
+
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  })),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+  usePathname: vi.fn(() => '/'),
+}));
+
+const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 
 describe('ProductoCard', () => {
   it('renderiza nombre, descripción y precio del producto', () => {
@@ -12,7 +25,7 @@ describe('ProductoCard', () => {
       stock: 10,
     };
 
-    render(<ProductoCard producto={producto} />);
+    render(<ProductoCard producto={producto} />, { wrapper });
 
     expect(screen.getByText('Lápiz grafito')).toBeInTheDocument();
     expect(screen.getByText('Lápiz de dibujo HB')).toBeInTheDocument();
@@ -28,7 +41,7 @@ describe('ProductoCard', () => {
       stock: 20,
     };
 
-    render(<ProductoCard producto={producto} />);
+    render(<ProductoCard producto={producto} />, { wrapper });
 
     expect(screen.getByText('-')).toBeInTheDocument();
   });

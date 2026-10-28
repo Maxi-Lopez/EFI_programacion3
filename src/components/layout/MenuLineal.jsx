@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -33,18 +34,23 @@ const itemsAdmin = [
 const esAdminOMVendedor = (rol) =>
   ['admin', 'administrador', 'vendedor'].includes(String(rol || '').toLowerCase());
 
+const calcularItems = (user, enDashboard) => {
+  const itemsPublicosSinOfertas = itemsPublicos.filter((i) => i.label !== 'Ofertas');
+  if (enDashboard) return itemsDashboard;
+  if (user) return [...itemsPublicosSinOfertas, ...(esAdminOMVendedor(user.rol) ? itemsAdmin : [])];
+  return itemsPublicos;
+};
+
 export default function MenuLineal() {
   const { user } = useAuth();
   const pathname = usePathname();
+  const [items, setItems] = useState(itemsPublicos);
   const enDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
 
-  const itemsPublicosSinOfertas = itemsPublicos.filter((i) => i.label !== 'Ofertas');
-
-  const items = enDashboard
-    ? itemsDashboard
-    : user
-      ? [...itemsPublicosSinOfertas, ...(esAdminOMVendedor(user.rol) ? itemsAdmin : [])]
-      : itemsPublicos;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItems(calcularItems(user, enDashboard));
+  }, [user, enDashboard]);
 
   return (
     <nav className="bg-white border-b border-slate-200 px-6 py-3 overflow-x-auto whitespace-nowrap">

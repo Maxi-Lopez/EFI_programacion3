@@ -18,6 +18,7 @@ export const productoSchema = z.object({
   stock_total: z.string().min(1, 'El stock es obligatorio').regex(/^\d+$/, 'Stock debe ser un número entero'),
   marca: z.string().min(1, 'Selecciona una marca'),
   categoria: z.string().min(1, 'Selecciona una categoría'),
+  imagen_url: z.string().url('URL inválida').optional().or(z.literal('')),
 });
 
 export default function ProductoForm({ modo = 'crear', id }) {
@@ -41,6 +42,7 @@ export default function ProductoForm({ modo = 'crear', id }) {
       stock_total: '',
       marca: '',
       categoria: '',
+      imagen_url: '',
     },
   });
 
@@ -56,6 +58,7 @@ export default function ProductoForm({ modo = 'crear', id }) {
           setValue('stock_total', String(producto.stock_total || ''));
           setValue('marca', String(producto.marca || ''));
           setValue('categoria', String(producto.categoria || ''));
+          setValue('imagen_url', producto.imagen_url || '');
         } catch (err) {
           setApiError(err.message || 'No se pudo cargar el producto');
         }
@@ -76,6 +79,7 @@ export default function ProductoForm({ modo = 'crear', id }) {
         stock_total: parseInt(data.stock_total, 10),
         marca: data.marca,
         categoria: data.categoria,
+        imagen_url: data.imagen_url || '',
       };
 
       if (modo === 'editar' && id) {
@@ -162,6 +166,15 @@ export default function ProductoForm({ modo = 'crear', id }) {
             error={errors.stock_total}
           />
           {errors.stock_total && <span className="text-xs text-red-500">{errors.stock_total.message}</span>}
+          <Input
+            id="imagen_url"
+            label="URL de imagen (opcional)"
+            type="url"
+            placeholder="https://ejemplo.com/imagen.jpg"
+            {...register('imagen_url')}
+            error={errors.imagen_url}
+          />
+          {errors.imagen_url && <span className="text-xs text-red-500">{errors.imagen_url.message}</span>}
           <div className="flex gap-2">
             <Boton type="submit" disabled={isSubmitting} className="w-full">
               {loading ? 'Guardando…' : 'Guardar'}

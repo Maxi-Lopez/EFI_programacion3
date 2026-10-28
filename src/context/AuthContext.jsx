@@ -35,8 +35,25 @@ export function AuthProvider({ children }) {
     const username = typeof window !== 'undefined' ? localStorage.getItem('username') : null;
     return { token, username: username || extraerUsername(decoded), rol };
   });
+  const [wishlist, setWishlist] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('wishlist');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    }
+  }, [wishlist]);
+
+  const toggleDeseo = (id) => {
+    setWishlist((prev) => prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]);
+  };
 
   const login = async (username, password) => {
     const data = await apiFetch('/token/', {
@@ -57,14 +74,16 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('username');
+    localStorage.removeItem('wishlist');
     document.cookie = 'access_token=; path=/; max-age=0';
     document.cookie = 'refresh_token=; path=/; max-age=0';
     setUser(null);
+    setWishlist([]);
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, wishlist, loading, login, logout, toggleDeseo }}>
       {children}
     </AuthContext.Provider>
   );
