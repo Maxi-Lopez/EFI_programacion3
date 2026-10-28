@@ -21,13 +21,18 @@ const extraerRol = (decoded) => {
   return decoded.role || decoded.rol || null;
 };
 
+const extraerUsername = (decoded) => {
+  if (!decoded) return null;
+  return decoded.username || decoded.sub || decoded.user_name || decoded.email || decoded.name || decoded.preferred_username || null;
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     if (!token) return null;
     const decoded = decodeToken(token);
     const rol = extraerRol(decoded);
-    return { token, username: decoded?.username || null, rol };
+    return { token, username: extraerUsername(decoded), rol };
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -42,7 +47,7 @@ export function AuthProvider({ children }) {
     document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
     document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
     const decoded = decodeToken(data.access);
-    setUser({ username, token: data.access, rol: extraerRol(decoded) });
+    setUser({ username: extraerUsername(decoded), token: data.access, rol: extraerRol(decoded) });
     router.push('/catalogo');
   };
 

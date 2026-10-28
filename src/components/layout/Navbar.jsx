@@ -61,7 +61,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <span className="text-xs text-slate-700 hidden md:block">{user.username}</span>
+                <span className="text-xs text-slate-700 hidden md:block">{user.username || user.rol || 'Usuario'}</span>
                 <Boton
                   onClick={handleLogout}
                   className="text-xs py-1 px-3"

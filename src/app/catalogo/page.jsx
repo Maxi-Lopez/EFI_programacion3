@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { apiFetch } from '@/utils/apiClient';
 import ProductoCard from '@/components/ProductoCard';
 import Card from '@/components/ui/Card';
@@ -14,22 +14,22 @@ import { useAuth } from '@/context/AuthContext';
 export default function CatalogoPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const search = searchParams.get('search') || '';
-  const [productos, setProductos] = useState([]);
+  const [allProductos, setAllProductos] = useState([]);
+  const [query, setQuery] = useState(searchParams.get('search') || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const productos = allProductos.filter((p) =>
+    p.nombre.toLowerCase().includes(query.toLowerCase())
+  );
 
   useEffect(() => {
     let montado = true;
     const cargar = async () => {
       try {
         setLoading(true);
-        const endpoint = search
-          ? `/catalogo/producto-get/?search=${encodeURIComponent(search)}`
-          : '/catalogo/producto-get/';
-        const data = await apiFetch(endpoint);
-        if (montado) setProductos(Array.isArray(data) ? data : data.results || []);
+        const data = await apiFetch('/catalogo/producto-get/');
+        if (montado) setAllProductos(Array.isArray(data) ? data : data.results || []);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar los productos');
       } finally {
@@ -38,27 +38,20 @@ export default function CatalogoPage() {
     };
     cargar();
     return () => { montado = false; };
-  }, [search]);
+  }, []);
 
   const handleBorrar = async (id) => {
     if (!window.confirm('¿Borrar este producto?')) return;
     try {
       await apiFetch(`/catalogo/producto/${id}/`, { method: 'DELETE' });
-      setProductos((prev) => prev.filter((p) => p.id !== id));
+      setAllProductos((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       setError(err.message || 'No se pudo borrar el producto');
     }
   };
 
   const handleSearchChange = (e) => {
-    const query = e.target.value;
-    const params = new URLSearchParams(searchParams);
-    if (query) {
-      params.set('search', query);
-    } else {
-      params.delete('search');
-    }
-    router.push(`/catalogo?${params.toString()}`);
+    setQuery(e.target.value);
   };
 
   if (loading) return <Cargando mensaje="Cargando productos…" />;
@@ -88,7 +81,7 @@ export default function CatalogoPage() {
           id="buscar"
           label="Buscar producto"
           placeholder="Buscar por nombre…"
-          value={search}
+          value={query}
           onChange={handleSearchChange}
           className="w-full max-w-md"
         />
@@ -96,7 +89,7 @@ export default function CatalogoPage() {
 
       {productos.length === 0 && (
         <div className="text-center py-10 text-slate-500">
-          No se encontraron productos{search ? ' con ese nombre' : ''}.
+          No se encontraron productos{query ? ' con ese nombre' : ''}.
         </div>
       )}
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { apiFetch } from '@/utils/apiClient';
 import { useAuth } from '@/context/AuthContext';
 import ProductoCard from '@/components/ProductoCard';
@@ -11,22 +11,22 @@ import Cargando from '@/components/Cargando';
 export default function DashboardPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const search = searchParams.get('search') || '';
-  const [productos, setProductos] = useState([]);
+  const [allProductos, setAllProductos] = useState([]);
+  const [query, setQuery] = useState(searchParams.get('search') || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const productos = allProductos.filter((p) =>
+    p.nombre.toLowerCase().includes(query.toLowerCase())
+  );
 
   useEffect(() => {
     let montado = true;
     const cargar = async () => {
       try {
         setLoading(true);
-        const endpoint = search
-          ? `/catalogo/producto-get/?search=${encodeURIComponent(search)}`
-          : '/catalogo/producto-get/';
-        const data = await apiFetch(endpoint);
-        if (montado) setProductos(Array.isArray(data) ? data : data.results || []);
+        const data = await apiFetch('/catalogo/producto-get/');
+        if (montado) setAllProductos(Array.isArray(data) ? data : data.results || []);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar los productos');
       } finally {
@@ -35,17 +35,20 @@ export default function DashboardPage() {
     };
     cargar();
     return () => { montado = false; };
-  }, [search]);
+  }, []);
 
   const handleSearchChange = (e) => {
-    const query = e.target.value;
-    const params = new URLSearchParams(searchParams);
-    if (query) {
-      params.set('search', query);
-    } else {
-      params.delete('search');
+    setQuery(e.target.value);
+  };
+
+  const handleBorrar = async (id) => {
+    if (!window.confirm('¿Borrar este producto?')) return;
+    try {
+      await apiFetch(`/catalogo/producto/${id}/`, { method: 'DELETE' });
+      setAllProductos((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      setError(err.message || 'No se pudo borrar el producto');
     }
-    router.push(`/dashboard?${params.toString()}`);
   };
 
   if (loading) return <Cargando mensaje="Cargando productos…" />;
@@ -53,10 +56,10 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      {search ? (
+      {query ? (
         <div className="flex items-center gap-2 mb-6 text-sm text-slate-600">
           <span>Resultados para: </span>
-          <span className="font-medium text-slate-800">{search}</span>
+          <span className="font-medium text-slate-800">{query}</span>
         </div>
       ) : null}
 
@@ -73,7 +76,7 @@ export default function DashboardPage() {
 
       {productos.length === 0 && (
         <div className="text-center py-20 text-slate-500">
-          No se encontraron productos{search ? ' con ese nombre' : ''}.
+          No se encontraron productos{query ? ' con ese nombre' : ''}.
         </div>
       )}
 
@@ -90,15 +93,7 @@ export default function DashboardPage() {
                   Editar
                 </Link>
                 <button
-                  onClick={() => {
-                    if (window.confirm('¿Borrar este producto?')) {
-                      apiFetch(`/catalogo/producto/${prod.id}/`, {
-                        method: 'DELETE',
-                      }).then(() => {
-                        router.push('/dashboard');
-                      });
-                    }
-                  }}
+                  onClick={() => handleBorrar(prod.id)}
                   className="flex-1 px-3 py-2 text-xs bg-red-600 hover:bg-red-700 text-center"
                 >
                   Borrar
