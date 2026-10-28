@@ -41,8 +41,19 @@ export async function apiFetch(endpoint, options = {}) {
   }
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Error en la petición');
+    let errorMessage = 'Error en la petición';
+    try {
+      const errorData = await response.json();
+      if (response.status === 400 && typeof errorData === 'object' && errorData !== null) {
+        const firstField = Object.values(errorData).flat()[0];
+        errorMessage = typeof firstField === 'string' ? firstField : JSON.stringify(errorData);
+      } else {
+        errorMessage = errorData.detail || JSON.stringify(errorData);
+      }
+    } catch {
+      errorMessage = `Error ${response.status}`;
+    }
+    throw new Error(errorMessage);
   }
 
   const text = await response.text();

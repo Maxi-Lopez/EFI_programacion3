@@ -1,5 +1,6 @@
 import ProductoForm from '@/components/ProductoForm';
 
-export default function EditarProductoPage({ params }) {
-  return <ProductoForm modo="editar" id={params.id} />;
+export default async function EditarProductoPage({ params }) {
+  const { id } = await params;
+  return <ProductoForm modo="editar" id={id} />;
 }

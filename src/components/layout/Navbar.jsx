@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -11,11 +12,20 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsReady(true);
+  }, []);
   const handleLogout = () => {
     logout();
     router.push('/');
   };
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-50">

@@ -24,8 +24,6 @@ export default function ProductoForm({ modo = 'crear', id }) {
   const router = useRouter();
   const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [marcas, setMarcas] = useState([]);
-  const [categorias, setCategorias] = useState([]);
 
   const {
     register,
@@ -45,24 +43,6 @@ export default function ProductoForm({ modo = 'crear', id }) {
       categoria: '',
     },
   });
-
-  useEffect(() => {
-    const cargarRefs = async () => {
-      try {
-        const [mRes, cRes] = await Promise.all([
-          apiFetch('/catalogo/marca-get/'),
-          apiFetch('/catalogo/categoria-get/'),
-        ]);
-        const mData = Array.isArray(mRes) ? mRes : mRes.results || [];
-        const cData = Array.isArray(cRes) ? cRes : cRes.results || [];
-        setMarcas(mData);
-        setCategorias(cData);
-      } catch (err) {
-        setApiError(err.message || 'No se pudieron cargar marcas y categorías');
-      }
-    };
-    cargarRefs();
-  }, []);
 
   useEffect(() => {
     if (modo === 'editar' && id) {
@@ -94,8 +74,8 @@ export default function ProductoForm({ modo = 'crear', id }) {
         descripcion_corta: data.descripcion_corta || '',
         precio_lista: parseFloat(data.precio_lista),
         stock_total: parseInt(data.stock_total, 10),
-        marca: parseInt(data.marca, 10),
-        categoria: parseInt(data.categoria, 10),
+        marca: data.marca,
+        categoria: data.categoria,
       };
 
       if (modo === 'editar' && id) {
@@ -151,33 +131,19 @@ export default function ProductoForm({ modo = 'crear', id }) {
             error={errors.descripcion_corta}
           />
           {errors.descripcion_corta && <span className="text-xs text-red-500">{errors.descripcion_corta.message}</span>}
-          <select
+          <Input
             id="marca"
             label="Marca"
             {...register('marca')}
-            className="block w-full px-3 py-2 border border-slate-300 rounded-md text-slate-700 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none"
-          >
-            <option value="">Selecciona una marca</option>
-            {marcas.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nombre}
-              </option>
-            ))}
-          </select>
+            error={errors.marca}
+          />
           {errors.marca && <span className="text-xs text-red-500">{errors.marca.message}</span>}
-          <select
+          <Input
             id="categoria"
             label="Categoría"
             {...register('categoria')}
-            className="block w-full px-3 py-2 border border-slate-300 rounded-md text-slate-700 focus:ring-2 focus:ring-slate-800 focus:border-slate-800 outline-none"
-          >
-            <option value="">Selecciona una categoría</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
+            error={errors.categoria}
+          />
           {errors.categoria && <span className="text-xs text-red-500">{errors.categoria.message}</span>}
           <Input
             id="precio_lista"
