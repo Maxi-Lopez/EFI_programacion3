@@ -9,25 +9,22 @@ export default function Footer() {
             <Image
               src="/images/logo.png"
               alt="Nexusgamer Logo"
-              width={24}
-              height={24}
+              width={36}
+              height={36}
               className="rounded"
             />
             <span className="text-sm font-medium text-slate-600">Nexusgamer</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
+            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors" aria-label="Facebook">
+              <Image src="/images/face.png" alt="Facebook" width={28} height={28} />
             </a>
-            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
+            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors" aria-label="Telegram">
+              <Image src="/images/tele.jpg" alt="Telegram" width={28} height={28} />
             </a>
-            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
-            </a>
-            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors">
-              <Image src="/redessociales.jpg" alt="Redes sociales" width={24} height={24} unoptimized />
+            <a href="#" className="text-slate-500 hover:text-slate-800 transition-colors" aria-label="Instagram">
+              <Image src="/images/insta.jpg" alt="Instagram" width={28} height={28} />
             </a>
           </div>
 

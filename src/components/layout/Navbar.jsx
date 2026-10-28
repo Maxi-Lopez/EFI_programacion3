@@ -40,8 +40,8 @@ export default function Navbar() {
               <Image
                 src="/images/logo.png"
                 alt="Nexusgamer Logo"
-                width={32}
-                height={32}
+                width={48}
+                height={48}
                 className="rounded"
               />
             </Link>
