@@ -35,7 +35,11 @@ export default function VentasPage() {
       try {
         setLoading(true);
         const data = await apiFetch('/ventas/venta-get/');
-        if (montado) setVentas(Array.isArray(data) ? data : data.results || []);
+        const lista = Array.isArray(data) ? data : data.results || [];
+        if (lista.length > 0) {
+          console.log('🔍 VENTA[0] estructura:', JSON.stringify(lista[0], null, 2));
+        }
+        if (montado) setVentas(lista);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar las ventas');
       } finally {
@@ -53,7 +57,11 @@ export default function VentasPage() {
     setDetalleError(null);
     try {
       const data = await apiFetch(`/ventas/detalle-venta-get/?venta=${ventaId}`);
-      setDetalleData(Array.isArray(data) ? data : data.results || data);
+      const lista = Array.isArray(data) ? data : data.results || data;
+      if (lista.length > 0) {
+        console.log('🔍 DETALLE VENTA[0] estructura:', JSON.stringify(lista[0], null, 2));
+      }
+      setDetalleData(lista);
     } catch (err) {
       setDetalleError(err.message || 'No se pudieron cargar los detalles');
     } finally {
@@ -90,13 +98,29 @@ export default function VentasPage() {
     } catch { return dateStr; }
   };
 
-  const getClienteNombre = (venta) => venta.cliente || venta.cliente_nombre || venta.username || '—';
+  const getClienteNombre = (venta) => {
+  if (venta.cliente && typeof venta.cliente === 'object') {
+    // 👇 Agregamos first_name y last_name
+    if (venta.cliente.first_name) {
+      return `${venta.cliente.first_name} ${venta.cliente.last_name || ''}`.trim();
+    }
+    return venta.cliente.nombre || venta.cliente.razon_social || venta.cliente.username || '—';
+  }
+  return venta.cliente_nombre || venta.cliente || venta.username || '—';
+};
 
   const getVentaId = (venta) => venta.id || venta.pk || '';
 
-  const getVentaTotal = (venta) => venta.total || venta.total_venta || venta.monto || 0;
+  const getVentaTotal = (venta) => {
+    // Prioridad: total calculado, total_venta, monto, monto_total
+    if (venta.total !== undefined && venta.total !== null) return venta.total;
+    if (venta.total_venta !== undefined && venta.total_venta !== null) return venta.total_venta;
+    if (venta.monto_total !== undefined && venta.monto_total !== null) return venta.monto_total;
+    if (venta.monto !== undefined && venta.monto !== null) return venta.monto;
+    return 0;
+  };
 
-  const getVentaFecha = (venta) => venta.fecha || venta.fecha_venta || venta.fecha_compra;
+  const getVentaFecha = (venta) => venta.fecha || venta.fecha_venta || venta.fecha_creacion || venta.created_at || venta.created;
 
   if (loading) return <Cargando mensaje="Cargando ventas…" size="lg" variant="neon" />;
   if (error) return (
@@ -227,29 +251,61 @@ export default function VentasPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[var(--color-border)]">
-                        {detalleData.map((item, idx) => (
-                          <tr key={item.id || item.pk || idx} className="hover:bg-[var(--color-surface)] transition-colors">
-                            <td className="px-4 py-3 text-sm text-[var(--color-text)]">
-                              {item.producto?.nombre || item.producto_nombre || item.nombre || 'Producto'}
-                              {item.producto?.sku && <span className="block text-xs text-[var(--color-text-dim)] font-mono">{item.producto.sku}</span>}
-                            </td>
-                            <td className="px-4 py-3 text-center text-sm text-[var(--color-text)]">
-                              {item.cantidad || item.cant || 0}
-                            </td>
-                            <td className="px-4 py-3 text-right text-sm font-mono text-[var(--color-neon-cyan)]">
-                              {formatPrice(item.precio_unitario || item.precio || item.precio_venta || 0)}
-                            </td>
-                            <td className="px-4 py-3 text-right text-sm font-display font-bold text-gradient-neon">
-                              {formatPrice(item.subtotal || item.total || (item.precio_unitario * item.cantidad) || 0)}
-                            </td>
-                          </tr>
-                        ))}
+                        {detalleData.map((item, idx) => {
+                          // Mapeo robusto de campos
+                          const productoNombre = 
+                            item.producto?.nombre || 
+                            item.producto?.nombre_producto ||
+                            item.producto_nombre || 
+                            item.nombre_producto ||
+                            item.nombre || 
+                            'Producto sin nombre';
+                          
+                          const cantidad = 
+                            item.cantidad || 
+                            item.cant || 
+                            item.quantity || 
+                            item.unidades ||
+                            0;
+                          
+                          const precioUnitario = 
+                            item.precio_unitario || 
+                            item.precio || 
+                            item.precio_venta || 
+                            item.unit_price || 
+                            0;
+                          
+                          const subtotal = 
+                            item.subtotal || 
+                            item.total || 
+                            item.sub_total ||
+                            (cantidad * parseFloat(precioUnitario || 0)) || 
+                            0;
+                          
+                          return (
+                            <tr key={item.id || item.pk || idx} className="hover:bg-[var(--color-surface)] transition-colors">
+                              <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                                {productoNombre}
+                                {item.producto?.sku && <span className="block text-xs text-[var(--color-text-dim)] font-mono">{item.producto.sku}</span>}
+                              </td>
+                              <td className="px-4 py-3 text-center text-sm text-[var(--color-text)]">
+                                {cantidad}
+                              </td>
+                              <td className="px-4 py-3 text-right text-sm font-mono text-[var(--color-neon-cyan)]">
+                                {formatPrice(precioUnitario)}
+                              </td>
+                              <td className="px-4 py-3 text-right text-sm font-display font-bold text-gradient-neon">
+                                {formatPrice(subtotal)}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                       <tfoot>
                         <tr className="bg-[var(--color-bg-elevated)] border-t-2 border-[var(--color-border)]">
                           <td colSpan={3} className="px-4 py-3 text-right font-display font-bold text-[var(--color-text-muted)]">Total Venta:</td>
                           <td className="px-4 py-3 text-right font-display text-2xl font-bold text-gradient-neon">
-                            {formatPrice(getVentaTotal(ventas.find(v => getVentaId(v) === detalleAbierto)))}
+                            {formatPrice(getVentaTotal(ventas.find(v => getVentaId(v) == detalleAbierto)))}
                           </td>
                         </tr>
                       </tfoot>

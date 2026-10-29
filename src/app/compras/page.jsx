@@ -33,7 +33,11 @@ export default function ComprasPage() {
       try {
         setLoading(true);
         const data = await apiFetch('/compras/compra-list/');
-        if (montado) setCompras(Array.isArray(data) ? data : data.results || []);
+        const lista = Array.isArray(data) ? data : data.results || [];
+        if (lista.length > 0) {
+          console.log('🔍 COMPRA[0] estructura:', JSON.stringify(lista[0], null, 2));
+        }
+        if (montado) setCompras(lista);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar las compras');
       } finally {
@@ -77,15 +81,29 @@ export default function ComprasPage() {
     } catch { return dateStr; }
   };
 
-  const getProveedorNombre = (compra) => compra.proveedor || compra.proveedor_nombre || compra.proveedor_empresa || '—';
+  const getProveedorNombre = (compra) => {
+    // Si proveedor es un objeto con nombre
+    if (compra.proveedor && typeof compra.proveedor === 'object') {
+      return compra.proveedor.nombre || compra.proveedor.razon_social || compra.proveedor.empresa || '—';
+    }
+    // Si viene como ID o campos planos
+    return compra.proveedor_nombre || compra.proveedor_empresa || compra.proveedor || '—';
+  };
 
   const getCompraId = (compra) => compra.id || compra.pk || '';
 
-  const getCompraTotal = (compra) => compra.total || compra.total_compra || compra.monto || 0;
+  const getCompraTotal = (compra) => {
+    // Prioridad: total calculado, total_compra, monto_total, monto
+    if (compra.total !== undefined && compra.total !== null) return compra.total;
+    if (compra.total_compra !== undefined && compra.total_compra !== null) return compra.total_compra;
+    if (compra.monto_total !== undefined && compra.monto_total !== null) return compra.monto_total;
+    if (compra.monto !== undefined && compra.monto !== null) return compra.monto;
+    return 0;
+  };
 
-  const getCompraFecha = (compra) => compra.fecha || compra.fecha_compra;
+  const getCompraFecha = (compra) => compra.fecha || compra.fecha_compra || compra.fecha_creacion || compra.created_at || compra.created;
 
-  const getCompraEstado = (compra) => compra.estado || compra.status;
+  const getCompraEstado = (compra) => compra.estado || compra.status || compra.estado_compra;
 
   if (loading) return <Cargando mensaje="Cargando compras…" size="lg" variant="neon" />;
   if (error) return (
@@ -229,23 +247,55 @@ export default function ComprasPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border)]">
-                      {detalleData.map((item, idx) => (
-                        <tr key={item.id || item.pk || idx} className="hover:bg-[var(--color-surface)] transition-colors">
-                          <td className="px-4 py-3 text-sm text-[var(--color-text)]">
-                            {item.producto?.nombre || item.producto_nombre || item.nombre || 'Producto'}
-                            {item.producto?.sku && <span className="block text-xs text-[var(--color-text-dim)] font-mono">{item.producto.sku}</span>}
-                          </td>
-                          <td className="px-4 py-3 text-center text-sm text-[var(--color-text)]">
-                            {item.cantidad || item.cant || 0}
-                          </td>
-                          <td className="px-4 py-3 text-right text-sm font-mono text-[var(--color-neon-cyan)]">
-                            {formatPrice(item.precio_unitario || item.precio || item.precio_compra || 0)}
-                          </td>
-                          <td className="px-4 py-3 text-right text-sm font-display font-bold text-gradient-neon">
-                            {formatPrice(item.subtotal || item.total || (item.precio_unitario * item.cantidad) || 0)}
-                          </td>
-                        </tr>
-                      ))}
+                      {detalleData.map((item, idx) => {
+                          // Mapeo robusto de campos
+                          const productoNombre = 
+                            item.producto?.nombre || 
+                            item.producto?.nombre_producto ||
+                            item.producto_nombre || 
+                            item.nombre_producto ||
+                            item.nombre || 
+                            'Producto sin nombre';
+                          
+                          const cantidad = 
+                            item.unidades || 
+                            item.cantidad || 
+                            item.cant || 
+                            item.quantity || 
+                            0;
+                          
+                          const precioUnitario = 
+                            item.precio_unitario || 
+                            item.precio || 
+                            item.precio_compra || 
+                            item.unit_price || 
+                            0;
+                          
+                          const subtotal = 
+                            item.subtotal || 
+                            item.total || 
+                            item.sub_total ||
+                            (cantidad * parseFloat(precioUnitario || 0)) || 
+                            0;
+                          
+                          return (
+                            <tr key={item.id || item.pk || idx} className="hover:bg-[var(--color-surface)] transition-colors">
+                              <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                                {productoNombre}
+                                {item.producto?.sku && <span className="block text-xs text-[var(--color-text-dim)] font-mono">{item.producto.sku}</span>}
+                              </td>
+                              <td className="px-4 py-3 text-center text-sm text-[var(--color-text)]">
+                                {cantidad}
+                              </td>
+                              <td className="px-4 py-3 text-right text-sm font-mono text-[var(--color-neon-cyan)]">
+                                {formatPrice(precioUnitario)}
+                              </td>
+                              <td className="px-4 py-3 text-right text-sm font-display font-bold text-gradient-neon">
+                                {formatPrice(subtotal)}
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                     <tfoot>
                       <tr className="bg-[var(--color-bg-elevated)] border-t-2 border-[var(--color-border)]">
