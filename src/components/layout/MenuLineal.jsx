@@ -30,11 +30,14 @@ export default function MenuLineal() {
   const { user } = useAuth();
   const pathname = usePathname();
   const [activeIndicator, setActiveIndicator] = useState({ width: 0, left: 0 });
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Calculamos si es admin/vendedor
-  const esAdmin = user && esAdminOMVendedor(user.rol);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // Armamos el array de ítems en tiempo de render (sin useEffect)
+  // Calculamos items solo cuando está montado (evita hydration mismatch)
+  const esAdmin = isMounted && user && esAdminOMVendedor(user.rol);
   const items = esAdmin ? [...itemsPublicos, ...itemsAdmin] : itemsPublicos;
 
   // Función para ver si un link está activo

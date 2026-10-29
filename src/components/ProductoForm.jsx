@@ -9,6 +9,7 @@ import { apiFetch } from '@/utils/apiClient';
 import Boton from '@/components/ui/Boton';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import Cargando from '@/components/Cargando';
 
 export const productoSchema = z.object({
   nombre: z.string().min(1, 'El nombre es obligatorio').max(100, 'Máximo 100 caracteres'),
