@@ -171,9 +171,9 @@ export default function VentasPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
-                {ventas.map((venta) => (
+                {ventas.map((venta, index) => (
                   <tr key={getVentaId(venta)} className="hover:bg-[var(--color-surface)] transition-colors">
-                    <td className="px-6 py-4 font-mono text-sm text-[var(--color-neon-cyan)]">#{getVentaId(venta)}</td>
+                    <td className="px-6 py-4 font-mono text-sm text-[var(--color-neon-cyan)]">#{String(index + 1).padStart(2, '0')}</td>
                     <td className="px-6 py-4 text-sm text-[var(--color-text)]">{formatDate(getVentaFecha(venta))}</td>
                     <td className="px-6 py-4 text-sm text-[var(--color-text)]">{getClienteNombre(venta)}</td>
                     <td className="px-6 py-4 text-right font-display font-bold text-gradient-neon">{formatPrice(getVentaTotal(venta))}</td>

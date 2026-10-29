@@ -155,9 +155,9 @@ export default function ComprasPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
-                {compras.map((compra) => (
+                {compras.map((compra, index) => (
                   <tr key={getCompraId(compra)} className="hover:bg-[var(--color-surface)] transition-colors">
-                    <td className="px-6 py-4 font-mono text-sm text-[var(--color-neon-cyan)]">#{getCompraId(compra)}</td>
+                    <td className="px-6 py-4 font-mono text-sm text-[var(--color-neon-cyan)]">#{String(index + 1).padStart(2, '0')}</td>
                     <td className="px-6 py-4 text-sm text-[var(--color-text)]">{formatDate(getCompraFecha(compra))}</td>
                     <td className="px-6 py-4 text-sm text-[var(--color-text)]">{getProveedorNombre(compra)}</td>
                     <td className="px-6 py-4 text-center">

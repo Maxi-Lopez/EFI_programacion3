@@ -32,7 +32,7 @@ const Input = forwardRef(
     const helperId = `${id}-helper`;
 
     return (
-      <div className={`relative w-full ${className}`}>
+      <div className={`relative flex flex-col w-full ${className}`}>
         {label && (
           <label
             htmlFor={id}
@@ -42,10 +42,10 @@ const Input = forwardRef(
             {required && <span className="text-[var(--color-neon-pink)] ml-1" aria-hidden="true">*</span>}
           </label>
         )}
-        <div className="relative">
+        <div className="relative flex-1">
           {leftIcon && (
             <div
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)] transition-colors duration-300 pointer-events-none peer-focus-within:text-[var(--color-neon-green)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)] transition-colors duration-300 pointer-events-none peer-focus-within:text-[var(--color-neon-green)] z-10"
               aria-hidden="true"
             >
               {leftIcon}
@@ -67,8 +67,8 @@ const Input = forwardRef(
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={error ? errorId : helperText ? helperId : undefined}
             className={`
-              input-neon w-full transition-all duration-300
-              ${leftIcon ? 'pl-12' : ''}
+              input-neon w-full transition-all duration-300 min-h-[48px] py-3
+              ${leftIcon ? 'pl-12 pr-4' : 'px-4'}
               ${rightIcon ? 'pr-12' : ''}
               ${error ? 'border-[var(--color-neon-pink)] focus:shadow-[0_0_0_3px_rgba(255,0,110,0.2),0_0_20px_var(--color-glow-pink)]' : ''}
               ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
@@ -77,7 +77,7 @@ const Input = forwardRef(
           />
           {rightIcon && (
             <div
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)] transition-colors duration-300 pointer-events-none peer-focus-within:text-[var(--color-neon-green)]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)] transition-colors duration-300 pointer-events-none peer-focus-within:text-[var(--color-neon-green)] z-10"
               aria-hidden="true"
             >
               {rightIcon}

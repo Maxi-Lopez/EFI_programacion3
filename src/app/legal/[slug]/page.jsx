@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Boton from '@/components/ui/Boton';
 
+export const instant = false;
+
 const paginasLegales = {
   terminos: {
     titulo: 'Términos y Condiciones',
