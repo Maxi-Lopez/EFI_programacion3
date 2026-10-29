@@ -42,7 +42,6 @@ export function AuthProvider({ children }) {
     }
     return [];
   });
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -83,7 +82,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, wishlist, loading, login, logout, toggleDeseo }}>
+    <AuthContext.Provider value={{ user, wishlist, login, logout, toggleDeseo }}>
       {children}
     </AuthContext.Provider>
   );

@@ -16,33 +16,57 @@ vi.mock('next/navigation', () => ({
 const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 
 describe('ProductoCard', () => {
-  it('renderiza nombre, descripción y precio del producto', () => {
+  it('renderiza nombre, precio y SKU del producto', () => {
     const producto = {
       id: 1,
       nombre: 'Lápiz grafito',
-      descripcion: 'Lápiz de dibujo HB',
+      descripcion_corta: 'Lápiz de dibujo HB',
       precio_lista: 1200.5,
-      stock: 10,
+      stock_total: 10,
+      sku: 'LAP-001',
+      marca: { nombre: 'TestMarca' },
+      categoria: { nombre: 'TestCat' },
     };
 
     render(<ProductoCard producto={producto} />, { wrapper });
 
     expect(screen.getByText('Lápiz grafito')).toBeInTheDocument();
     expect(screen.getByText('Lápiz de dibujo HB')).toBeInTheDocument();
-    expect(screen.getByText('$1200.5')).toBeInTheDocument();
+    expect(screen.getByText(/^\$\s*1\.201$/)).toBeInTheDocument();
   });
 
-  it('muestra guion cuando no hay descripción', () => {
+  it('muestra marca y categoría como badges', () => {
     const producto = {
       id: 2,
       nombre: 'Borrador',
-      descripcion: '',
+      descripcion_corta: '',
       precio_lista: 500,
-      stock: 20,
+      stock_total: 20,
+      sku: 'BRR-001',
+      marca: { nombre: 'MarcaTest' },
+      categoria: { nombre: 'CatTest' },
     };
 
     render(<ProductoCard producto={producto} />, { wrapper });
 
-    expect(screen.getByText('-')).toBeInTheDocument();
+    expect(screen.getByText('MarcaTest')).toBeInTheDocument();
+    expect(screen.getByText('CatTest')).toBeInTheDocument();
+  });
+
+  it('renderiza precio formateado correctamente', () => {
+    const producto = {
+      id: 3,
+      nombre: 'Producto Caro',
+      descripcion_corta: 'Test',
+      precio_lista: 1234567,
+      stock_total: 5,
+      sku: 'EXP-001',
+      marca: { nombre: 'Marca' },
+      categoria: { nombre: 'Cat' },
+    };
+
+    render(<ProductoCard producto={producto} />, { wrapper });
+
+    expect(screen.getByText(/\$\s*1\.234\.567/)).toBeInTheDocument();
   });
 });
