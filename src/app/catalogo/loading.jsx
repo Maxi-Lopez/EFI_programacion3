@@ -1,7 +1,17 @@
 export default function CatalogoLoading() {
   return (
-    <div className="flex items-center justify-center py-20 text-sm text-slate-500">
-      Cargando productos…
+    <div className="min-h-[60vh] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-neon-green)]/5 via-transparent to-[var(--color-neon-cyan)]/5 animate-aurora" aria-hidden="true" />
+      <div className="absolute inset-0 bg-grid-neon animate-grid opacity-20" aria-hidden="true" />
+
+      <div className="relative z-10 text-center">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--color-neon-green)] to-[var(--color-neon-cyan)] flex items-center justify-center shadow-[0_0_40px_var(--color-glow-green)] animate-neon-pulse">
+          <svg className="w-10 h-10 text-[#050508]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <p className="font-display text-xl font-bold text-gradient-neon animate-pulse">Cargando productos…</p>
+      </div>
     </div>
   );
 }
