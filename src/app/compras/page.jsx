@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { apiFetch } from '@/utils/apiClient';
 import Card from '@/components/ui/Card';
 import Cargando from '@/components/Cargando';
@@ -13,13 +12,27 @@ export default function ComprasPage() {
   const [compras, setCompras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [detalleAbierto, setDetalleAbierto] = useState(null);
+  const [detalleData, setDetalleData] = useState(null);
+
+  const cargarCompras = async () => {
+    try {
+      setLoading(true);
+      const data = await apiFetch('/compras/compra-list/');
+      setCompras(Array.isArray(data) ? data : data.results || []);
+    } catch (err) {
+      setError(err.message || 'No se pudieron cargar las compras');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let montado = true;
     const cargar = async () => {
       try {
         setLoading(true);
-        const data = await apiFetch('/compras/compra-get/');
+        const data = await apiFetch('/compras/compra-list/');
         if (montado) setCompras(Array.isArray(data) ? data : data.results || []);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar las compras');
@@ -31,16 +44,25 @@ export default function ComprasPage() {
     return () => { montado = false; };
   }, []);
 
-  if (loading) return <Cargando mensaje="Cargando compras…" size="lg" variant="neon" />;
-  if (error) return (
-    <div className="container mx-auto p-4">
-      <Card variant="neonPink" padding="lg" className="max-w-md mx-auto text-center">
-        <h2 className="font-display text-xl font-bold text-[var(--color-neon-pink)] mb-2">Error</h2>
-        <p className="text-[var(--color-text-muted)]">{error}</p>
-        <Boton variant="neonOutlinePink" onClick={() => window.location.reload()} className="mt-4">Reintentar</Boton>
-      </Card>
-    </div>
-  );
+  const handleVerDetalles = (compra) => {
+    setDetalleAbierto(compra);
+    setDetalleData(compra.items || compra.detalles || []);
+  };
+
+  const handleCerrarDetalle = () => {
+    setDetalleAbierto(null);
+    setDetalleData(null);
+  };
+
+  const handleBorrar = async (id) => {
+    if (!window.confirm('¿Borrar esta compra? Esta acción no se puede deshacer.')) return;
+    try {
+      await apiFetch(`/compras/compra/${id}/`, { method: 'DELETE' });
+      await cargarCompras();
+    } catch (err) {
+      setError(err.message || 'No se pudo borrar la compra');
+    }
+  };
 
   const formatPrice = (price) => {
     if (!price) return '$0';
@@ -54,6 +76,27 @@ export default function ComprasPage() {
       return new Date(dateStr).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch { return dateStr; }
   };
+
+  const getProveedorNombre = (compra) => compra.proveedor || compra.proveedor_nombre || compra.proveedor_empresa || '—';
+
+  const getCompraId = (compra) => compra.id || compra.pk || '';
+
+  const getCompraTotal = (compra) => compra.total || compra.total_compra || compra.monto || 0;
+
+  const getCompraFecha = (compra) => compra.fecha || compra.fecha_compra;
+
+  const getCompraEstado = (compra) => compra.estado || compra.status;
+
+  if (loading) return <Cargando mensaje="Cargando compras…" size="lg" variant="neon" />;
+  if (error) return (
+    <div className="container mx-auto p-4">
+      <Card variant="neonPink" padding="lg" className="max-w-md mx-auto text-center">
+        <h2 className="font-display text-xl font-bold text-[var(--color-neon-pink)] mb-2">Error</h2>
+        <p className="text-[var(--color-text-muted)]">{error}</p>
+        <Boton variant="neonOutlinePink" onClick={cargarCompras} className="mt-4">Reintentar</Boton>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="container mx-auto p-4 animate-in fade-in duration-500">
@@ -80,34 +123,143 @@ export default function ComprasPage() {
           <p className="text-[var(--color-text-muted)]">Las compras aparecerán aquí cuando se registren.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {compras.map((compra) => (
-            <Card key={compra.id} variant="neon" padding="lg" hover>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <span className="badge-neon-cyan text-sm">Compra #{compra.id || compra.pk || ''}</span>
-                  <span className="ml-2 text-sm text-[var(--color-text-muted)]">{formatDate(compra.fecha || compra.fecha_compra)}</span>
+        <Card variant="neon" padding="none" className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full" role="table">
+              <thead>
+                <tr className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+                  <th className="px-6 py-4 text-left text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">ID</th>
+                  <th className="px-6 py-4 text-left text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Fecha</th>
+                  <th className="px-6 py-4 text-left text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Proveedor</th>
+                  <th className="px-6 py-4 text-center text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Estado</th>
+                  <th className="px-6 py-4 text-right text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Total</th>
+                  <th className="px-6 py-4 text-center text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)]">
+                {compras.map((compra) => (
+                  <tr key={getCompraId(compra)} className="hover:bg-[var(--color-surface)] transition-colors">
+                    <td className="px-6 py-4 font-mono text-sm text-[var(--color-neon-cyan)]">#{getCompraId(compra)}</td>
+                    <td className="px-6 py-4 text-sm text-[var(--color-text)]">{formatDate(getCompraFecha(compra))}</td>
+                    <td className="px-6 py-4 text-sm text-[var(--color-text)]">{getProveedorNombre(compra)}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`badge-glass text-xs capitalize ${getCompraEstado(compra) ? '' : 'bg-[var(--color-bg-elevated)]'}`}>
+                        {getCompraEstado(compra) || '—'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right font-display font-bold text-gradient-neon">{formatPrice(getCompraTotal(compra))}</td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Boton
+                          variant="neonOutline"
+                          size="sm"
+                          onClick={() => handleVerDetalles(compra)}
+                        >
+                          Ver Detalles
+                        </Boton>
+                        {['admin', 'administrador'].includes(user?.rol?.toLowerCase()) && (
+                          <Boton
+                            variant="neonOutlinePink"
+                            size="sm"
+                            onClick={() => handleBorrar(getCompraId(compra))}
+                          >
+                            Eliminar
+                          </Boton>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* Modal Detalles Compra */}
+      {detalleAbierto && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] rounded-2xl p-6 shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-display font-bold text-white">Detalle de Compra #{getCompraId(detalleAbierto)}</h2>
+              <button
+                onClick={handleCerrarDetalle}
+                className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] transition-colors"
+                aria-label="Cerrar"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {detalleData && detalleData.length === 0 ? (
+              <p className="text-center text-[var(--color-text-muted)] py-8">Esta compra no tiene productos registrados.</p>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
+                  <div>
+                    <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Proveedor</p>
+                    <p className="font-display text-lg font-bold text-[var(--color-text)]">{getProveedorNombre(detalleAbierto)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Fecha</p>
+                    <p className="font-display text-lg font-bold text-[var(--color-text)]">{formatDate(getCompraFecha(detalleAbierto))}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Estado</p>
+                    <p className="font-display text-lg font-bold text-[var(--color-text)]">
+                      <span className="badge-glass capitalize">{getCompraEstado(detalleAbierto) || '—'}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">Total</p>
+                    <p className="font-display text-2xl font-bold text-gradient-neon">{formatPrice(getCompraTotal(detalleAbierto))}</p>
+                  </div>
                 </div>
-                <span className="font-display text-xl font-bold text-gradient-neon">{formatPrice(compra.total || compra.total_compra || compra.monto)}</span>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full" role="table">
+                    <thead>
+                      <tr className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+                        <th className="px-4 py-3 text-left text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Producto</th>
+                        <th className="px-4 py-3 text-center text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Cantidad</th>
+                        <th className="px-4 py-3 text-right text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Precio Unit.</th>
+                        <th className="px-4 py-3 text-right text-xs font-display uppercase tracking-wider text-[var(--color-text-muted)]">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--color-border)]">
+                      {detalleData.map((item, idx) => (
+                        <tr key={item.id || item.pk || idx} className="hover:bg-[var(--color-surface)] transition-colors">
+                          <td className="px-4 py-3 text-sm text-[var(--color-text)]">
+                            {item.producto?.nombre || item.producto_nombre || item.nombre || 'Producto'}
+                            {item.producto?.sku && <span className="block text-xs text-[var(--color-text-dim)] font-mono">{item.producto.sku}</span>}
+                          </td>
+                          <td className="px-4 py-3 text-center text-sm text-[var(--color-text)]">
+                            {item.cantidad || item.cant || 0}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm font-mono text-[var(--color-neon-cyan)]">
+                            {formatPrice(item.precio_unitario || item.precio || item.precio_compra || 0)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm font-display font-bold text-gradient-neon">
+                            {formatPrice(item.subtotal || item.total || (item.precio_unitario * item.cantidad) || 0)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-[var(--color-bg-elevated)] border-t-2 border-[var(--color-border)]">
+                        <td colSpan={3} className="px-4 py-3 text-right font-display font-bold text-[var(--color-text-muted)]">Total Compra:</td>
+                        <td className="px-4 py-3 text-right font-display text-2xl font-bold text-gradient-neon">
+                          {formatPrice(getCompraTotal(detalleAbierto))}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <p className="text-[var(--color-text-muted)]">
-                  <span className="font-medium text-[var(--color-text)]">Proveedor:</span> {compra.proveedor || compra.proveedor_nombre || '—'}
-                </p>
-                {compra.items && compra.items.length > 0 && (
-                  <p className="text-[var(--color-text-muted)]">
-                    <span className="font-medium text-[var(--color-text)]">Items:</span> {compra.items.length}
-                  </p>
-                )}
-                {compra.estado && (
-                  <p className="text-[var(--color-text-muted)]">
-                    <span className="font-medium text-[var(--color-text)]">Estado:</span>{' '}
-                    <span className="badge-glass text-xs capitalize">{compra.estado}</span>
-                  </p>
-                )}
-              </div>
-            </Card>
-          ))}
+            )}
+          </div>
         </div>
       )}
     </div>
