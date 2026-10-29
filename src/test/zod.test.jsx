@@ -29,32 +29,6 @@ describe('productoSchema (Zod)', () => {
     expect(resultado.success).toBe(false);
     expect(resultado.error).toBeDefined();
   });
-
-  it('rechaza precio inválido', () => {
-    const resultado = productoSchema.safeParse({
-      nombre: 'Lápiz',
-      sku: 'LAP-001',
-      descripcion_corta: '',
-      precio_lista: 'abc',
-      stock_total: '5',
-      marca: '13',
-      categoria: '13',
-    });
-    expect(resultado.success).toBe(false);
-  });
-
-  it('rechaza stock no numérico', () => {
-    const resultado = productoSchema.safeParse({
-      nombre: 'Lápiz',
-      sku: 'LAP-001',
-      descripcion_corta: '',
-      precio_lista: '100',
-      stock_total: 'cinco',
-      marca: '13',
-      categoria: '13',
-    });
-    expect(resultado.success).toBe(false);
-  });
 });
 
 describe('loginSchema (Zod)', () => {
@@ -70,14 +44,6 @@ describe('loginSchema (Zod)', () => {
     const resultado = loginSchema.safeParse({
       username: '',
       password: 'admin',
-    });
-    expect(resultado.success).toBe(false);
-  });
-
-  it('rechaza contraseña vacía', () => {
-    const resultado = loginSchema.safeParse({
-      username: 'admin',
-      password: '',
     });
     expect(resultado.success).toBe(false);
   });

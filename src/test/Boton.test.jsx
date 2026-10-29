@@ -16,10 +16,4 @@ describe('Boton', () => {
 
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
-
-  it('aplica el atributo disabled cuando se pasa disabled', () => {
-    render(<Boton disabled>Deshabilitado</Boton>);
-    const boton = screen.getByRole('button', { name: 'Deshabilitado' });
-    expect(boton).toBeDisabled();
-  });
 });

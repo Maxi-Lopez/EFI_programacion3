@@ -19,10 +19,19 @@ export default function CatalogoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
+  const [filtroCategoria, setFiltroCategoria] = useState('todas');
+  const [filtroMarca, setFiltroMarca] = useState('todas');
 
-  const productos = allProductos.filter((p) =>
-    p.nombre.toLowerCase().includes(query.toLowerCase())
-  );
+  // Extraer categorías y marcas únicas de los productos cargados
+  const categoriasUnicas = [...new Set(allProductos.map((p) => p.categoria?.nombre).filter(Boolean))].sort();
+  const marcasUnicas = [...new Set(allProductos.map((p) => p.marca?.nombre).filter(Boolean))].sort();
+
+  const productos = allProductos.filter((p) => {
+    const coincideBusqueda = p.nombre.toLowerCase().includes(query.toLowerCase());
+    const coincideCategoria = filtroCategoria === 'todas' || p.categoria?.nombre === filtroCategoria;
+    const coincideMarca = filtroMarca === 'todas' || p.marca?.nombre === filtroMarca;
+    return coincideBusqueda && coincideCategoria && coincideMarca;
+  });
 
   useEffect(() => {
     let montado = true;
@@ -94,18 +103,96 @@ export default function CatalogoPage() {
       </div>
 
       <Card variant="glass" padding="md" className="mb-8">
-        <div className="relative max-w-xl mx-auto md:mx-0">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-dim)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <Input
-            id="buscar"
-            label="Buscar producto"
-            placeholder="Buscar por nombre…"
-            value={query}
-            onChange={handleSearchChange}
-            className="w-full"
-          />
+        <div className="space-y-4">
+          <div className="relative max-w-xl mx-auto md:mx-0">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-dim)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <Input
+              id="buscar"
+              label="Buscar producto"
+              placeholder="Buscar por nombre…"
+              value={query}
+              onChange={handleSearchChange}
+              className="w-full"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="filtro-categoria" className="label-neon">Categoría</label>
+              <select
+                id="filtro-categoria"
+                value={filtroCategoria}
+                onChange={(e) => setFiltroCategoria(e.target.value)}
+                className="input-neon w-full appearance-none bg-[var(--color-bg-elevated)]"
+              >
+                <option value="todas">Todas las categorías</option>
+                {categoriasUnicas.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="filtro-marca" className="label-neon">Marca</label>
+              <select
+                id="filtro-marca"
+                value={filtroMarca}
+                onChange={(e) => setFiltroMarca(e.target.value)}
+                className="input-neon w-full appearance-none bg-[var(--color-bg-elevated)]"
+              >
+                <option value="todas">Todas las marcas</option>
+                {marcasUnicas.map((marca) => (
+                  <option key={marca} value={marca}>{marca}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {(filtroCategoria !== 'todas' || filtroMarca !== 'todas') && (
+            <div className="flex flex-wrap gap-2">
+              {filtroCategoria !== 'todas' && (
+                <span className="badge-neon text-xs flex items-center gap-1">
+                  Categoría: {filtroCategoria}
+                  <button
+                    type="button"
+                    onClick={() => setFiltroCategoria('todas')}
+                    className="ml-1 hover:text-[var(--color-neon-pink)] transition-colors"
+                    aria-label="Quitar filtro de categoría"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {filtroMarca !== 'todas' && (
+                <span className="badge-neon text-xs flex items-center gap-1">
+                  Marca: {filtroMarca}
+                  <button
+                    type="button"
+                    onClick={() => setFiltroMarca('todas')}
+                    className="ml-1 hover:text-[var(--color-neon-pink)] transition-colors"
+                    aria-label="Quitar filtro de marca"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {(filtroCategoria !== 'todas' || filtroMarca !== 'todas') && (
+                <button
+                  type="button"
+                  onClick={() => { setFiltroCategoria('todas'); setFiltroMarca('todas'); }}
+                  className="btn-neon-outline btn-sm px-3 py-1.5"
+                >
+                  Limpiar todos
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 
@@ -117,21 +204,35 @@ export default function CatalogoPage() {
             </svg>
           </div>
           <h2 className="font-display text-2xl font-bold text-[var(--color-text)] mb-2">
-            No se encontraron productos{query ? ' con ese nombre' : ''}.
+            No se encontraron productos
+            {(query || filtroCategoria !== 'todas' || filtroMarca !== 'todas') ? ' con los filtros aplicados' : ''}.
           </h2>
           <p className="text-[var(--color-text-muted)] max-w-md mx-auto">
-            {query
-              ? 'Intenta con otros términos de búsqueda o revisa la ortografía.'
+            {query || filtroCategoria !== 'todas' || filtroMarca !== 'todas'
+              ? 'Intenta ampliar tu búsqueda o cambiar los filtros.'
               : 'Aún no hay productos en el catálogo.'}
           </p>
-          {query && (
-            <Boton
-              variant="neonOutline"
-              onClick={() => setQuery('')}
-              className="mt-4"
-            >
-              Limpiar búsqueda
-            </Boton>
+          {(query || filtroCategoria !== 'todas' || filtroMarca !== 'todas') && (
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
+              {query && (
+                <Boton
+                  variant="neonOutline"
+                  onClick={() => setQuery('')}
+                  className="mt-4 sm:mt-0"
+                >
+                  Limpiar búsqueda
+                </Boton>
+              )}
+              {(filtroCategoria !== 'todas' || filtroMarca !== 'todas') && (
+                <Boton
+                  variant="neonOutline"
+                  onClick={() => { setFiltroCategoria('todas'); setFiltroMarca('todas'); }}
+                  className="mt-4 sm:mt-0"
+                >
+                  Limpiar filtros
+                </Boton>
+              )}
+            </div>
           )}
         </div>
       )}

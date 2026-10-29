@@ -7,8 +7,6 @@ import { useAuth } from '@/context/AuthContext';
 
 const itemsPublicos = [
   { id: 'productos', label: 'Productos', href: '/catalogo' },
-  { id: 'ofertas', label: 'Ofertas', href: '/catalogo?ofertas=1' },
-  { id: 'marcas', label: 'Marcas', href: '/catalogo?marcas=1' },
   { id: 'lista-deseos', label: 'Lista de Deseos', href: '/lista-deseos' },
   { id: 'contacto', label: 'Contacto', href: '/contacto' },
   { id: 'por-que-comprar', label: '¿Por qué comprar?', href: '/por-que-comprar' },

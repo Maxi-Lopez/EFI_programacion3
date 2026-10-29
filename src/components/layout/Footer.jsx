@@ -36,7 +36,9 @@ export default function Footer() {
             </p>
             <div className="flex gap-3" role="list" aria-label="Redes sociales">
               <a
-                href="#"
+                href="https://facebook.com/nexusgamer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-2.5 glass rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-neon-green)] hover:border-[var(--color-neon-green)] hover:shadow-[0_0_15px_var(--color-glow-green)] transition-all duration-300"
                 aria-label="Facebook"
               >
@@ -45,7 +47,9 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://t.me/nexusgamer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-2.5 glass rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-neon-cyan)] hover:border-[var(--color-neon-cyan)] hover:shadow-[0_0_15px_var(--color-glow-cyan)] transition-all duration-300"
                 aria-label="Telegram"
               >
@@ -54,7 +58,9 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://instagram.com/nexusgamer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-2.5 glass rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-neon-pink)] hover:border-[var(--color-neon-pink)] hover:shadow-[0_0_15px_var(--color-glow-pink)] transition-all duration-300"
                 aria-label="Instagram"
               >
@@ -63,7 +69,9 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://discord.gg/nexusgamer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-2.5 glass rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-neon-amber)] hover:border-[var(--color-neon-amber)] hover:shadow-[0_0_15px_var(--color-glow-amber)] transition-all duration-300"
                 aria-label="Discord"
               >
@@ -103,11 +111,11 @@ export default function Footer() {
             <nav aria-label="Enlaces legales">
               <ul className="space-y-2">
                 {[
-                  { label: 'Términos y condiciones', href: '/Terminos' },
-                  { label: 'Política de privacidad', href: '/Politica' },
-                  { label: 'Política de cookies', href: '/Cookies' },
-                  { label: 'Devoluciones', href: '/Devoluciones' },
-                  { label: 'Envíos', href: '/Envios' },
+                  { label: 'Términos y condiciones', href: '/legal/terminos' },
+                  { label: 'Política de privacidad', href: '/legal/privacidad' },
+                  { label: 'Política de cookies', href: '/legal/cookies' },
+                  { label: 'Devoluciones', href: '/legal/devoluciones' },
+                  { label: 'Envíos', href: '/legal/envios' },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link

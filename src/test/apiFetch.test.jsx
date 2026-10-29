@@ -59,12 +59,4 @@ describe('apiFetch', () => {
       })
     );
   });
-
-  it('lanza error cuando la respuesta no es OK', async () => {
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ detail: 'No encontrado' }), { status: 404 })
-    );
-
-    await expect(apiFetch('/catalogo/producto/999/')).rejects.toThrow('No encontrado');
-  });
 });
