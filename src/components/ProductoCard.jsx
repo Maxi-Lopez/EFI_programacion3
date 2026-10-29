@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ProductoCard({ producto }) {
   const { user, wishlist, toggleDeseo } = useAuth();
   const favorito = user ? wishlist.includes(producto.id) : false;
+  
+  // Estado para controlar si la imagen falló al cargar
+  const [imageError, setImageError] = useState(false);
 
   const imagenUrl = producto.imagen_url || producto.marca?.logo;
 
@@ -22,20 +26,27 @@ export default function ProductoCard({ producto }) {
   return (
     <article className="card-neon group relative overflow-hidden" tabIndex={0} role="listitem">
       <div className="aspect-[4/3] relative overflow-hidden bg-[var(--color-bg-elevated)]">
-        {imagenUrl ? (
+        {/* Si hay URL y no hubo error, renderiza la imagen. Si falla o no hay URL, renderiza el fallback */}
+        {imagenUrl && !imageError ? (
           <img
             src={imagenUrl}
             alt={producto.nombre}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
+            onError={() => setImageError(true)} 
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-neon-green)]/10 to-[var(--color-neon-cyan)]/10">
-            <svg className="w-16 h-16 text-[var(--color-border)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[var(--color-neon-green)]/10 to-[var(--color-neon-cyan)]/10 relative">
+            <svg className="w-16 h-16 text-[var(--color-border)] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
+            {/* Texto opcional de la marca para que no quede tan vacío */}
+            <span className="text-xs font-bold text-[var(--color-text-dim)] uppercase tracking-widest">
+              {producto.marca?.nombre || 'Nexusgamer'}
+            </span>
           </div>
         )}
+        
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
 
         {user && (
@@ -47,7 +58,7 @@ export default function ProductoCard({ producto }) {
             }}
             aria-label={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
             aria-pressed={favorito}
-            className="
+            className={`
               absolute top-3 right-3 z-10
               p-2 rounded-xl
               glass-strong
@@ -59,7 +70,7 @@ export default function ProductoCard({ producto }) {
                 ? 'text-[var(--color-neon-pink)] shadow-[0_0_15px_var(--color-glow-pink)] border border-[var(--color-neon-pink)]/30'
                 : 'hover:text-[var(--color-neon-pink)] hover:border-[var(--color-neon-pink)]/50'
               }
-            "
+            `}
           >
             {favorito ? (
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

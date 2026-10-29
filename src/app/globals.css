@@ -723,8 +723,3 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-neon-green);
   color: #050508;
 }
-
-::selection {
-  background: var(--color-neon-pink);
-  color: #ffffff;
-}

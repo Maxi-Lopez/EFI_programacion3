@@ -99,7 +99,7 @@ export default function DashboardPage() {
           { label: 'Sin stock', value: stats.sinStock, icon: '⚠️', color: stats.sinStock > 0 ? 'neonPink' : 'neon' },
           { label: 'Categorías', value: stats.categorias, icon: '🏷️', color: 'neonCyan' },
         ].map((stat, i) => (
-          <Card key={i} variant="neon" padding="lg" className={`animate-in slide-in-from-bottom-4 duration-300 delay-${i * 100}`}>
+          <Card key={stat.label} variant="neon" padding="lg" className={`animate-in slide-in-from-bottom-4 duration-300 delay-${i * 100}`}>
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-[var(--color-text-muted)] mb-1">{stat.label}</p>

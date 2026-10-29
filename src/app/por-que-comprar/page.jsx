@@ -63,7 +63,7 @@ export default function PorQueComprarPage() {
 
       <div className="space-y-6">
         {razones.map((razon, i) => (
-          <Card key={i} variant="gradientBorder" padding="xl" className="animate-in slide-in-from-bottom-4 duration-500 delay-{i * 100}">
+          <Card key={razon.title} variant="gradientBorder" padding="xl" className="animate-in slide-in-from-bottom-4 duration-500 delay-{i * 100}">
             <div className="flex items-start gap-6">
               <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${razon.gradient} flex items-center justify-center flex-shrink-0 ${razon.glow}`}>
                 {razon.icon}

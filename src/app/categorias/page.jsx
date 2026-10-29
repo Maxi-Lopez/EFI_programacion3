@@ -19,7 +19,7 @@ export default function CategoriasPage() {
     const cargar = async () => {
       try {
         setLoading(true);
-        const data = await apiFetch('/catalogo/categoria/');
+        const data = await apiFetch('/catalogo/categoria-get/');
         if (montado) setCategorias(Array.isArray(data) ? data : data.results || []);
       } catch (err) {
         if (montado) setError(err.message || 'No se pudieron cargar las categorías');

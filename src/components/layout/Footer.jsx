@@ -103,11 +103,11 @@ export default function Footer() {
             <nav aria-label="Enlaces legales">
               <ul className="space-y-2">
                 {[
-                  { label: 'Términos y condiciones', href: '#' },
-                  { label: 'Política de privacidad', href: '#' },
-                  { label: 'Política de cookies', href: '#' },
-                  { label: 'Devoluciones', href: '#' },
-                  { label: 'Envíos', href: '#' },
+                  { label: 'Términos y condiciones', href: '/Terminos' },
+                  { label: 'Política de privacidad', href: '/Politica' },
+                  { label: 'Política de cookies', href: '/Cookies' },
+                  { label: 'Devoluciones', href: '/Devoluciones' },
+                  { label: 'Envíos', href: '/Envios' },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
@@ -127,11 +127,6 @@ export default function Footer() {
           <p className="text-xs text-[var(--color-text-dim)] text-center md:text-left">
             Nexusgamer &mdash; Tienda de computación &copy; {year}
           </p>
-          <div className="flex items-center gap-4 text-xs text-[var(--color-text-dim)]">
-            <span className="font-display text-[var(--color-neon-green)]">Hecho con</span>
-            <span className="text-[var(--color-neon-pink)]">♥</span>
-            <span className="font-display">Next.js 16 + Tailwind v4</span>
-          </div>
         </div>
       </div>
     </footer>

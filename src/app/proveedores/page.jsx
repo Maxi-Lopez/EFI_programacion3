@@ -1,18 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { apiFetch } from '@/utils/apiClient';
 import Card from '@/components/ui/Card';
 import Cargando from '@/components/Cargando';
 import { useAuth } from '@/context/AuthContext';
 import Boton from '@/components/ui/Boton';
+import ProveedorForm from '@/components/ProveedorForm';
 
 export default function ProveedoresPage() {
   const { user } = useAuth();
   const [proveedores, setProveedores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [formAbierto, setFormAbierto] = useState(false);
+  const [proveedorEditando, setProveedorEditando] = useState(null);
 
   useEffect(() => {
     let montado = true;
@@ -30,6 +32,48 @@ export default function ProveedoresPage() {
     cargar();
     return () => { montado = false; };
   }, []);
+
+  const handleNuevo = () => {
+    setProveedorEditando(null);
+    setFormAbierto(true);
+  };
+
+  const handleEditar = (prov) => {
+    setProveedorEditando(prov);
+    setFormAbierto(true);
+  };
+
+  const handleCerrarForm = () => {
+    setFormAbierto(false);
+    setProveedorEditando(null);
+  };
+
+  const handleGuardar = async () => {
+    await cargarProveedores();
+    handleCerrarForm();
+  };
+
+  const cargarProveedores = async () => {
+    try {
+      setLoading(true);
+      const data = await apiFetch('/proveedores/proveedor-get/');
+      setProveedores(Array.isArray(data) ? data : data.results || []);
+    } catch (err) {
+      setError(err.message || 'No se pudieron cargar los proveedores');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBorrar = async (id) => {
+    if (!window.confirm('¿Borrar este proveedor?')) return;
+    try {
+      await apiFetch(`/proveedores/proveedor/${id}/`, { method: 'DELETE' });
+      setProveedores((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      setError(err.message || 'No se pudo borrar el proveedor');
+    }
+  };
 
   if (loading) return <Cargando mensaje="Cargando proveedores…" size="lg" variant="neon" />;
   if (error) return (
@@ -52,6 +96,12 @@ export default function ProveedoresPage() {
         {['admin', 'administrador', 'vendedor'].includes(user?.rol?.toLowerCase()) && (
           <div className="flex items-center gap-4">
             <span className="badge-neon text-sm">Total: {proveedores.length}</span>
+            <Boton variant="neon" onClick={handleNuevo}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Nuevo Proveedor
+            </Boton>
           </div>
         )}
       </div>
@@ -113,9 +163,27 @@ export default function ProveedoresPage() {
                   </p>
                 )}
               </div>
+              {['admin', 'administrador', 'vendedor'].includes(user?.rol?.toLowerCase()) && (
+                <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--color-border)]">
+                  <Boton variant="neonOutline" size="sm" onClick={() => handleEditar(prov)} className="flex-1">
+                    Editar
+                  </Boton>
+                  <Boton variant="neonOutlinePink" size="sm" onClick={() => handleBorrar(prov.id)} className="flex-1">
+                    Eliminar
+                  </Boton>
+                </div>
+              )}
             </Card>
           ))}
         </div>
+      )}
+
+      {formAbierto && (
+        <ProveedorForm
+          proveedor={proveedorEditando}
+          onSave={handleGuardar}
+          onCancel={handleCerrarForm}
+        />
       )}
     </div>
   );
