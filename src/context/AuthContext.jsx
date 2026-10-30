@@ -62,8 +62,10 @@ export function AuthProvider({ children }) {
     localStorage.setItem('access_token', data.access);
     localStorage.setItem('refresh_token', data.refresh);
     localStorage.setItem('username', username);
-    document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
-    document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const secureFlag = isProduction ? '; Secure' : '';
+    document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax${secureFlag}`;
+    document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${secureFlag}`;
     const decoded = decodeToken(data.access);
     setUser({ username, token: data.access, rol: extraerRol(decoded) });
     router.push('/catalogo');
@@ -74,8 +76,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('username');
     localStorage.removeItem('wishlist');
-    document.cookie = 'access_token=; path=/; max-age=0';
-    document.cookie = 'refresh_token=; path=/; max-age=0';
+    const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const secureFlag = isProduction ? '; Secure' : '';
+    document.cookie = `access_token=; path=/; max-age=0${secureFlag}`;
+    document.cookie = `refresh_token=; path=/; max-age=0${secureFlag}`;
     setUser(null);
     setWishlist([]);
     router.push('/login');
