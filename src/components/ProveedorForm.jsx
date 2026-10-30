@@ -10,7 +10,9 @@ import Input from '@/components/ui/Input';
 
 const proveedorSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').max(100),
-  cuit: z.string().min(11, 'El CUIT debe tener 11 dígitos').max(11).regex(/^\d+$/, 'Solo números'),
+  cuit: z.string()
+    .transform((val) => val.replace(/\D/g, ''))
+    .refine((val) => val.length === 11, 'El CUIT debe tener 11 dígitos'),
   telefono: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   direccion: z.string().optional(),
