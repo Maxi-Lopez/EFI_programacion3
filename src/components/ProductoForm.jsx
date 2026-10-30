@@ -17,8 +17,8 @@ export const productoSchema = z.object({
   descripcion_corta: z.string().max(500, 'Máximo 500 caracteres').optional(),
   precio_lista: z.string().min(1, 'El precio es obligatorio').regex(/^\d+(\.\d{1,2})?$/, 'Precio inválido'),
   stock_total: z.string().min(1, 'El stock es obligatorio').regex(/^\d+$/, 'Stock debe ser un número entero'),
-  marca: z.string().min(1, 'Selecciona una marca'),
-  categoria: z.string().min(1, 'Selecciona una categoría'),
+  marca: z.string().min(1, 'La marca es obligatoria'),
+  categoria: z.string().min(1, 'La categoría es obligatoria'),
   imagen_url: z.string().url('URL inválida').optional().or(z.literal('')),
 });
 
@@ -26,8 +26,6 @@ export default function ProductoForm({ modo = 'crear', id }) {
   const router = useRouter();
   const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [marcas, setMarcas] = useState([]);
-  const [categorias, setCategorias] = useState([]);
 
   const {
     register,
@@ -51,22 +49,6 @@ export default function ProductoForm({ modo = 'crear', id }) {
   });
 
   useEffect(() => {
-    const cargarOpciones = async () => {
-      try {
-        const [marcasRes, categoriasRes] = await Promise.all([
-          apiFetch('/catalogo/marca-get/'),
-          apiFetch('/catalogo/categoria-get/'),
-        ]);
-        setMarcas(Array.isArray(marcasRes) ? marcasRes : marcasRes.results || []);
-        setCategorias(Array.isArray(categoriasRes) ? categoriasRes : categoriasRes.results || []);
-      } catch (err) {
-        console.error('Error cargando opciones:', err);
-      }
-    };
-    cargarOpciones();
-  }, []);
-
-  useEffect(() => {
     if (modo === 'editar' && id) {
       const cargarProducto = async () => {
         try {
@@ -77,8 +59,8 @@ export default function ProductoForm({ modo = 'crear', id }) {
           setValue('descripcion_corta', producto.descripcion_corta || '');
           setValue('precio_lista', String(producto.precio_lista || ''));
           setValue('stock_total', String(producto.stock_total || ''));
-          setValue('marca', String(producto.marca || producto.marca_id || ''));
-          setValue('categoria', String(producto.categoria || producto.categoria_id || ''));
+          setValue('marca', producto.marca?.nombre || producto.marca || '');
+          setValue('categoria', producto.categoria?.nombre || producto.categoria || '');
           setValue('imagen_url', producto.imagen_url || '');
         } catch (err) {
           setApiError(err.message || 'No se pudo cargar el producto');
@@ -217,41 +199,33 @@ export default function ProductoForm({ modo = 'crear', id }) {
           {errors.descripcion_corta && <p className="mt-1.5 text-sm text-[var(--color-neon-pink)]">{errors.descripcion_corta.message}</p>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label htmlFor="marca" className="label-neon">Marca</label>
-              <select
-                id="marca"
-                {...register('marca')}
-                className="input-neon w-full appearance-none bg-[var(--color-bg-elevated)]"
-                aria-invalid={errors.marca ? 'true' : 'false'}
-              >
-                <option value="">Seleccionar marca</option>
-                {marcas.map((marca) => (
-                  <option key={marca.id} value={marca.id}>
-                    {marca.nombre || marca.nombre_marca || marca}
-                  </option>
-                ))}
-              </select>
-              {errors.marca && <p className="mt-1.5 text-sm text-[var(--color-neon-pink)]">{errors.marca.message}</p>}
-            </div>
+            <Input
+              id="marca"
+              label="Marca"
+              placeholder="Ej: NVIDIA, AMD, Intel"
+              {...register('marca')}
+              error={errors.marca?.message}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              }
+            />
+            {errors.marca && <p className="mt-1.5 text-sm text-[var(--color-neon-pink)]">{errors.marca.message}</p>}
 
-            <div>
-              <label htmlFor="categoria" className="label-neon">Categoría</label>
-              <select
-                id="categoria"
-                {...register('categoria')}
-                className="input-neon w-full appearance-none bg-[var(--color-bg-elevated)]"
-                aria-invalid={errors.categoria ? 'true' : 'false'}
-              >
-                <option value="">Seleccionar categoría</option>
-                {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.nombre || cat.nombre_categoria || cat}
-                  </option>
-                ))}
-              </select>
-              {errors.categoria && <p className="mt-1.5 text-sm text-[var(--color-neon-pink)]">{errors.categoria.message}</p>}
-            </div>
+            <Input
+              id="categoria"
+              label="Categoría"
+              placeholder="Ej: Placas de video, Procesadores, Memoria RAM"
+              {...register('categoria')}
+              error={errors.categoria?.message}
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              }
+            />
+            {errors.categoria && <p className="mt-1.5 text-sm text-[var(--color-neon-pink)]">{errors.categoria.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
