@@ -4,6 +4,9 @@ export function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('access_token')?.value;
 
+  // DEBUG: log cookie presence
+  console.log('[MIDDLEWARE]', { pathname, hasToken: !!token, cookieHeader: request.headers.get('cookie') });
+
   // 1. Rutas que SOLO pueden ver Admin y Vendedor
   const rutasAdmin = [
     '/dashboard',
