@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -33,10 +33,18 @@ export default function RegistroPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
+    reset,
   } = useForm({
     resolver: zodResolver(registroSchema),
     defaultValues: { username: '', email: '', password: '', confirmar_password: '', telefono: '', dni: '' },
   });
+
+  useEffect(() => {
+    setExito(false);
+    setUsuarioRegistrado('');
+    setApiError(null);
+    reset({ username: '', email: '', password: '', confirmar_password: '', telefono: '', dni: '' });
+  }, [reset]);
 
   const password = watch('password');
 
