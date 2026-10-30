@@ -44,7 +44,7 @@ export default function RegistroPage() {
     setUsuarioRegistrado('');
     setApiError(null);
     reset({ username: '', email: '', password: '', confirmar_password: '', telefono: '', dni: '' });
-  }, [reset]);
+  }, []);
 
   const password = watch('password');
 
@@ -185,16 +185,16 @@ export default function RegistroPage() {
               </svg>
             }
             helperText={password && (
-              <div className="mt-2 h-1.5 bg-[var(--color-bg-elevated)] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-300"
+              <span className="block mt-2 h-1.5 bg-[var(--color-bg-elevated)] rounded-full overflow-hidden">
+                <span
+                  className="block h-full rounded-full transition-all duration-300"
                   style={{
                     width: `${(strength.level / 5) * 100}%`,
-                    backgroundColor: strength.color,
-                    boxShadow: `0 0 10px ${strength.color}`,
+                    backgroundColor: "var(--color-neon-green)",
+                    boxShadow: "0 0 10px var(--color-glow-green)"
                   }}
-                />
-              </div>
+                ></span>
+              </span>
             )}
           />
           {errors.password && <p className="mt-1.5 text-sm text-[var(--color-neon-pink)] flex items-center gap-1">{errors.password.message}</p>}

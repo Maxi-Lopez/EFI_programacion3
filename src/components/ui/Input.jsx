@@ -97,12 +97,12 @@ const Input = forwardRef(
           </p>
         )}
         {helperText && !error && (
-          <p
+          <div
             id={helperId}
             className="mt-2 text-sm text-[var(--color-text-dim)]"
           >
             {helperText}
-          </p>
+          </div>
         )}
       </div>
     );
