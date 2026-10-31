@@ -1,7 +1,9 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api';
 
+import { getCookie } from './cookies';
+
 export async function apiFetch(endpoint, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  const token = typeof window !== 'undefined' ? getCookie('access_token') : null;
 
   const headers = {
     'Content-Type': 'application/json',
@@ -19,7 +21,7 @@ export async function apiFetch(endpoint, options = {}) {
   });
 
   if (response.status === 401) {
-    const refresh = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+    const refresh = typeof window !== 'undefined' ? getCookie('refresh_token') : null;
     if (refresh) {
       const refreshRes = await fetch(`${BASE_URL}/token/refresh/`, {
         method: 'POST',
@@ -29,12 +31,16 @@ export async function apiFetch(endpoint, options = {}) {
 
       if (refreshRes.ok) {
         const data = await refreshRes.json();
-        localStorage.setItem('access_token', data.access);
+        const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        const secureFlag = isProduction ? '; Secure' : '';
+        document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax${secureFlag}`;
         headers['Authorization'] = `Bearer ${data.access}`;
         return fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
       } else {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        const secureFlag = isProduction ? '; Secure' : '';
+        document.cookie = `access_token=; path=/; max-age=0${secureFlag}`;
+        document.cookie = `refresh_token=; path=/; max-age=0${secureFlag}`;
         throw new Error('Sesión expirada');
       }
     }

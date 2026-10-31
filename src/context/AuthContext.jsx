@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/utils/apiClient';
+import { getCookie } from '@/utils/cookies';
 
 const AuthContext = createContext();
 
@@ -28,16 +29,16 @@ const extraerUsername = (decoded) => {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const token = typeof window !== 'undefined' ? getCookie('access_token') : null;
     if (!token) return null;
     const decoded = decodeToken(token);
     const rol = extraerRol(decoded);
-    const username = typeof window !== 'undefined' ? localStorage.getItem('username') : null;
-    return { token, username: username || extraerUsername(decoded), rol };
+    const username = extraerUsername(decoded);
+    return { token, username, rol };
   });
   const [wishlist, setWishlist] = useState(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('wishlist');
+      const saved = getCookie('wishlist');
       return saved ? JSON.parse(saved) : [];
     }
     return [];
@@ -46,7 +47,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+      document.cookie = `wishlist=${JSON.stringify(wishlist)}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
     }
   }, [wishlist]);
 
@@ -59,23 +60,16 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    localStorage.setItem('access_token', data.access);
-    localStorage.setItem('refresh_token', data.refresh);
-    localStorage.setItem('username', username);
     const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
     const secureFlag = isProduction ? '; Secure' : '';
     document.cookie = `access_token=${data.access}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax${secureFlag}`;
     document.cookie = `refresh_token=${data.refresh}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax${secureFlag}`;
     const decoded = decodeToken(data.access);
-    setUser({ username, token: data.access, rol: extraerRol(decoded) });
+    setUser({ username: extraerUsername(decoded) || username, token: data.access, rol: extraerRol(decoded) });
     router.push('/catalogo');
   };
 
   const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('wishlist');
     const isProduction = typeof window !== 'undefined' && window.location.protocol === 'https:';
     const secureFlag = isProduction ? '; Secure' : '';
     document.cookie = `access_token=; path=/; max-age=0${secureFlag}`;
